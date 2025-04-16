@@ -6,11 +6,11 @@ import { fruits } from "../models/fruit.js";
 import superjson from "superjson";
 import * as userModel from "../models/user.js";
 import jwt from "jsonwebtoken";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET!;
-import type { Context } from "./context.js"; 
-import type { Response as ExpressResponse } from 'express';
+import type { Context } from "./context.js";
+import type { Response as ExpressResponse } from "express";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -66,6 +66,18 @@ export const appRouter = t.router({
 
         return { id: user.id, username: user.username };
       }),
+    logout: t.procedure.mutation(({ ctx }) => {
+      const res = ctx.res as ExpressResponse;
+
+      res.clearCookie("jwt", {
+        httpOnly: true,
+        secure: false, // 本番はtrue
+        sameSite: "lax",
+      });
+
+      return { success: true };
+    }),
+
     me: t.procedure.query(({ ctx }) => {
       if (!ctx.user) throw new Error("未ログインです");
       return ctx.user;
