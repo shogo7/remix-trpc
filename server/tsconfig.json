@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2020",
+    "esModuleInterop": true,
+    "strict": true,
+    "strictNullChecks": true,
+    "typeRoots": ["./node_modules/@types", "./server/types"]
+
+  },
+"include": ["src", "types", "server"]
+}
