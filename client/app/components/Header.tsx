@@ -1,3 +1,4 @@
+import { Link } from '@remix-run/react';
 import { useMe } from '../hooks/useMe';
 import { useLogout } from '../hooks/useLogout';
 
@@ -16,7 +17,12 @@ const Header = () => {
         <span>読み込み中...</span>
       ) : user ? (
         <>
-          <span className="text-green-600 font-semibold">{user.username} さん、ようこそ！</span>
+          <div className="flex items-center space-x-4">
+            <span className="text-green-600 font-semibold">{user.username} さん、ようこそ！</span>
+            <Link to="/secret" className="text-blue-400 hover:underline">
+              Secretページ
+            </Link>
+          </div>
           <button
             onClick={handleLogout}
             className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"

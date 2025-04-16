@@ -30,16 +30,12 @@ pnpm install
 ## 🔧 開発モードで起動
 サーバー（Express）
 ```bash
-コピーする
-編集する
 cd server
 pnpm dev
 ```
 
 クライアント（Remix）
 ```bash
-コピーする
-編集する
 cd client
 pnpm dev
 ```
@@ -71,7 +67,7 @@ src/middleware/auth.ts : Express ミドルウェア（認証処理）
 db.json : モックデータベース（ローカルJSON）
 ```
 
-## 📝 今後のTODO（例）
+## 📝 今後のTODO
 ・ 認証の実装強化（JWT）
 
 ・ データベースの導入（MongoDB）
