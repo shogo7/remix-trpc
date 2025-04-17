@@ -4,6 +4,7 @@ import cors from 'cors';
 import { appRouter } from './trpc/index.js';
 import { createExpressMiddleware } from '@trpc/server/adapters/express';
 import { authMiddleware } from './middleware/auth.js';
+import { csrfMiddleware } from './middleware/csrf.js';
 import cookieParser from 'cookie-parser';
 import { createContext } from './trpc/context.js';
 import dotenv from 'dotenv';
@@ -14,6 +15,7 @@ const PORT = process.env.PORT ?? 3010;
 
 app.use(cookieParser());
 app.use(authMiddleware);
+app.use(csrfMiddleware);
 
 
 app.use(cors({
