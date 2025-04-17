@@ -1,14 +1,17 @@
+// client/app/components/Header.tsx
 import { Link } from '@remix-run/react';
 import { useMe } from '../hooks/useMe';
 import { useLogout } from '../hooks/useLogout';
+import { useQueryClient } from '@tanstack/react-query';
 
 const Header = () => {
-  const { data: user, isLoading, refetch } = useMe();
+  const queryClient = useQueryClient();
+  const { data: user, isLoading,  } = useMe();
   const logoutMutation = useLogout();
 
   const handleLogout = async () => {
     await logoutMutation.mutateAsync();
-    refetch(); // 再取得してログイン状態を反映
+    queryClient.clear(); 
   };
 
   return (

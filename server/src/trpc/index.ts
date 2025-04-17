@@ -60,7 +60,7 @@ export const appRouter = t.router({
         res.cookie("jwt", token, {
           httpOnly: true,
           secure: false, // 本番ではtrueにする（HTTPSのみ）
-          sameSite: "lax",
+          sameSite: 'strict',
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -72,7 +72,7 @@ export const appRouter = t.router({
       res.clearCookie("jwt", {
         httpOnly: true,
         secure: false, // 本番はtrue
-        sameSite: "lax",
+        sameSite: 'strict',
       });
 
       return { success: true };

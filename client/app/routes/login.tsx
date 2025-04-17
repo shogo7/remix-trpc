@@ -14,13 +14,14 @@ export default function Login() {
     e.preventDefault();
     try {
       await mutation.mutateAsync({ username, password });
-      await queryClient.invalidateQueries({ queryKey: [["user", "me"]] });
+      await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
       alert("ログイン成功！");
       navigate("/");
     } catch (err) {
       alert("ログイン失敗：" + (err as Error).message);
     }
   };
+
 
   return (
     <div className="p-4 max-w-md mx-auto">

@@ -1,3 +1,5 @@
+// client/app/root.tsx
+
 import type { LinksFunction } from "@remix-run/node";
 import {
   Links,
@@ -12,6 +14,7 @@ import superjson from "superjson";
 import { trpc } from "./lib/trpc";
 import "./tailwind.css";
 import Header from "./components/Header";
+import Cookies from "js-cookie"; // これを追加！
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -53,15 +56,20 @@ export default function App() {
         url: "http://localhost:3010/trpc",
         transformer: superjson,
         fetch(url, options) {
+          const csrfToken = Cookies.get("csrf-token"); // クッキーから取得
           return fetch(url, {
             ...options,
             credentials: "include",
+            headers: {
+              ...options?.headers,
+              "x-csrf-token": csrfToken || "", 
+            },
           });
         },
       }),
     ],
   });
-
+  
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
