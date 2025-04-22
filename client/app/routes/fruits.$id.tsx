@@ -1,7 +1,9 @@
+// client/app/routes/fruits.$id.tsx
 import { useLoaderData, Link } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { createServerSideHelpers } from "@trpc/react-query/server";
 import superjson from "superjson";
+import type { Context } from '../../../server/src/trpc/context';
 
 import { appRouter } from "../../../server/src/trpc/index.js";
 
@@ -12,12 +14,17 @@ export async function loader({ params }: LoaderFunctionArgs) {
     throw new Response("Invalid fruit ID", { status: 400 });
   }
 
+
   const helpers = createServerSideHelpers({
     router: appRouter,
-    ctx: {},
+    ctx: {
+      req: {} as unknown as Context['req'],
+      res: {} as unknown as Context['res'],
+      user: null,
+    },
     transformer: superjson,
   });
-
+    
   try {
     const fruit = await helpers.getFruitById.fetch(id);
     return ({ fruit });

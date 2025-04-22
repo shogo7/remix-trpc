@@ -28,235 +28,137 @@
 │   ├── fruit.ts
 │   └── user.ts
 └── trpc
-    ├── a.ts
     ├── context.ts
     └── index.ts
 
-7 directories, 22 files
+7 directories, 21 files
 ```
 -e 
-# 📄 ファイル中身
--e \n---\n### ./client/app/entry.server.tsx\n```ts
-/**
- * By default, Remix will handle generating the HTTP Response for you.
- * You are free to delete this file if you'd like to, but if you ever want it revealed again, you can run `npx remix reveal` ✨
- * For more information, see https://remix.run/file-conventions/entry.server
- */
+# 📄 ファイルの中身
+-e 
+---
+### ./client/app/routes/_index.tsx
+```ts
+// client/app/routes/_index.tsx
 
-import { PassThrough } from "node:stream";
-
-import type { AppLoadContext, EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
-import { RemixServer } from "@remix-run/react";
-import { isbot } from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
-
-const ABORT_DELAY = 5_000;
-
-export default function handleRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext,
-  // This is ignored so we can keep it in the template for visibility.  Feel
-  // free to delete this parameter in your app if you're not using it!
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  loadContext: AppLoadContext
-) {
-  return isbot(request.headers.get("user-agent") || "")
-    ? handleBotRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      )
-    : handleBrowserRequest(
-        request,
-        responseStatusCode,
-        responseHeaders,
-        remixContext
-      );
-}
-
-function handleBotRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext
-) {
-  return new Promise((resolve, reject) => {
-    let shellRendered = false;
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
-      {
-        onAllReady() {
-          shellRendered = true;
-          const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
-
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(stream, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error: unknown) {
-          reject(error);
-        },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
-            console.error(error);
-          }
-        },
-      }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
-  });
-}
-
-function handleBrowserRequest(
-  request: Request,
-  responseStatusCode: number,
-  responseHeaders: Headers,
-  remixContext: EntryContext
-) {
-  return new Promise((resolve, reject) => {
-    let shellRendered = false;
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer
-        context={remixContext}
-        url={request.url}
-        abortDelay={ABORT_DELAY}
-      />,
-      {
-        onShellReady() {
-          shellRendered = true;
-          const body = new PassThrough();
-          const stream = createReadableStreamFromReadable(body);
-
-          responseHeaders.set("Content-Type", "text/html");
-
-          resolve(
-            new Response(stream, {
-              headers: responseHeaders,
-              status: responseStatusCode,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(error: unknown) {
-          reject(error);
-        },
-        onError(error: unknown) {
-          responseStatusCode = 500;
-          // Log streaming rendering errors from inside the shell.  Don't log
-          // errors encountered during initial shell rendering since they'll
-          // reject and get logged in handleDocumentRequest.
-          if (shellRendered) {
-            console.error(error);
-          }
-        },
-      }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
-  });
-}
--e \n```
--e \n---\n### ./client/app/entry.client.tsx\n```ts
-// client/app/entry.client.tsx
-import { RemixBrowser } from "@remix-run/react";
-import { startTransition, StrictMode } from "react";
-import { hydrateRoot } from "react-dom/client";
-import { trpc } from "./lib/trpc";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { httpBatchLink } from "@trpc/client";
-import superjson from "superjson"; 
-
-const queryClient = new QueryClient();
-const trpcClient = trpc.createClient({
-  links: [
-    httpBatchLink({
-      url: "http://localhost:3001/trpc",
-      transformer: superjson,
-    }),
-  ],
-});
-
-startTransition(() => {
-  hydrateRoot(
-    document,
-    <StrictMode>
-      <trpc.Provider client={trpcClient} queryClient={queryClient}>
-        <QueryClientProvider client={queryClient}>
-          <RemixBrowser />
-        </QueryClientProvider>
-      </trpc.Provider>
-    </StrictMode>
-  );
-});
--e \n```
--e \n---\n### ./client/app/components/Header.tsx\n```ts
-// client/app/components/Header.tsx
 import { Link } from '@remix-run/react';
-import { useMe } from '../hooks/useMe';
-import { useLogout } from '../hooks/useLogout';
-import { useQueryClient } from '@tanstack/react-query';
+import { trpc } from '../lib/trpc';
 
-const Header = () => {
-  const queryClient = useQueryClient();
-  const { data: user, isLoading,  } = useMe();
-  const logoutMutation = useLogout();
-
-  const handleLogout = async () => {
-    await logoutMutation.mutateAsync();
-    queryClient.clear(); 
-  };
+export default function Index() {
+  const { data: fruits, isLoading, error } = trpc.getFruits.useQuery();
 
   return (
-    <header className="bg-gray-900 p-4 shadow-sm mb-4 flex justify-between items-center">
-      {isLoading ? (
-        <span>読み込み中...</span>
-      ) : user ? (
-        <>
-          <div className="flex items-center space-x-4">
-            <span className="text-green-600 font-semibold">{user.username} さん、ようこそ！</span>
-            <Link to="/secret" className="text-blue-400 hover:underline">
-              Secretページ
-            </Link>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="ml-4 bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-          >
-            ログアウト
-          </button>
-        </>
-      ) : (
-        <span className="text-red-500">ログインしてください</span>
-      )}
-    </header>
-  );
-};
+    <div className="container mx-auto p-4">
+      <div className="flex justify-end space-x-4 mb-4">
+        <Link to="/register" className="text-blue-500 hover:underline">
+          Register
+        </Link>
+        <Link to="/login" className="text-blue-500 hover:underline">
+          Login
+        </Link>
+      </div>
 
-export default Header;
--e \n```
--e \n---\n### ./client/app/root.tsx\n```ts
+      <h1 className="mb-4 text-2xl font-bold">Fruit List</h1>
+
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error: {error.message}</p>}
+      {!fruits || fruits.length === 0 ? (
+        <p>No fruits available</p>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {fruits.map((fruit) => (
+            <div key={fruit.id} className="rounded border p-4 shadow-sm">
+              <Link to={`/fruits/${fruit.id}`} className="block hover:underline">
+                <h2 className="text-xl font-semibold">{fruit.name}</h2>
+                <p>
+                  Color: <span style={{ color: fruit.color }}>{fruit.color}</span>
+                </p>
+                <p>Price: {fruit.price}</p>
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+-e 
+```
+-e 
+---
+### ./client/app/routes/fruits.$id.tsx
+```ts
+// client/app/routes/fruits.$id.tsx
+import { useLoaderData, Link } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "@remix-run/node";
+import { createServerSideHelpers } from "@trpc/react-query/server";
+import superjson from "superjson";
+import type { Context } from '../../../server/src/trpc/context';
+
+import { appRouter } from "../../../server/src/trpc/index.js";
+
+export async function loader({ params }: LoaderFunctionArgs) {
+  const id = Number(params.id);
+
+  if (!params.id || isNaN(id)) {
+    throw new Response("Invalid fruit ID", { status: 400 });
+  }
+
+
+  const helpers = createServerSideHelpers({
+    router: appRouter,
+    ctx: {
+      req: {} as unknown as Context['req'],
+      res: {} as unknown as Context['res'],
+      user: null,
+    },
+    transformer: superjson,
+  });
+    
+  try {
+    const fruit = await helpers.getFruitById.fetch(id);
+    return ({ fruit });
+  } catch (error) {
+    console.error(`Error loading fruit ${id}:`, error);
+    throw new Response("Fruit not found", { status: 404 });
+  }
+}
+
+export default function FruitDetail() {
+  const { fruit } = useLoaderData<typeof loader>();
+
+  return (
+    <div className="container mx-auto p-4">
+      <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">
+        ← Back to fruits list
+      </Link>
+      <div className="mt-4 p-6 border rounded shadow-sm">
+        <h1 className="text-3xl font-bold mb-4">{fruit.name}</h1>
+        <p className="text-lg mb-2">
+          Color: <span style={{ color: fruit.color }}>{fruit.color}</span>
+        </p>
+        <p className="text-lg mb-2">Price: {fruit.price} </p>
+      </div>
+    </div>
+  );
+}
+-e 
+```
+-e 
+---
+### ./client/app/lib/trpc.ts
+```ts
+// client/app/lib/trpc.ts
+import { createTRPCReact } from '@trpc/react-query';
+import type { AppRouter } from '../../../server/src/trpc'; 
+
+export const trpc = createTRPCReact<AppRouter>();
+-e 
+```
+-e 
+---
+### ./client/app/root.tsx
+```ts
 // client/app/root.tsx
 
 import type { LinksFunction } from "@remix-run/node";
@@ -340,343 +242,52 @@ export default function App() {
     </trpc.Provider>
   );
 }
--e \n```
--e \n---\n### ./client/app/hooks/useLogout.ts\n```ts
-// client/app/hooks/useLogout.ts
-import { trpc } from '../lib/trpc';
+-e 
+```
+-e 
+---
+### ./server/src/index.ts
+```ts
+// server/src/index.ts
+import express from 'express';
+import cors from 'cors';
+import { appRouter } from './trpc/index.js';
+import { createExpressMiddleware } from '@trpc/server/adapters/express';
+import { authMiddleware } from './middleware/auth.js';
+import { csrfMiddleware } from './middleware/csrf.js';
+import cookieParser from 'cookie-parser';
+import { createContext } from './trpc/context.js';
+import dotenv from 'dotenv';
+dotenv.config();
 
-export const useLogout = () => {
-  return trpc.user.logout.useMutation();
-};
--e \n```
--e \n---\n### ./client/app/hooks/useMe.ts\n```ts
-// client/app/hooks/useMe.ts
-import { trpc } from "../lib/trpc";
+const app = express();
+const PORT = process.env.PORT ?? 3010;
 
-export const useMe = () => {
-  return trpc.user.me.useQuery(undefined, {
-    retry: false,
-    refetchOnWindowFocus: false,
-  });
-};
--e \n```
--e \n---\n### ./client/app/lib/trpc.ts\n```ts
-// client/app/lib/trpc.ts
-import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '../../../server/src/trpc'; 
-
-export const trpc = createTRPCReact<AppRouter>();
--e \n```
--e \n---\n### ./client/app/routes/login.tsx\n```ts
-import { useState } from "react";
-import { trpc } from "../lib/trpc";
-import { useNavigate } from "@remix-run/react";
-import { useQueryClient } from "@tanstack/react-query";
-
-export default function Login() {
-  const navigate = useNavigate();
-  const mutation = trpc.user.login.useMutation();
-  const queryClient = useQueryClient(); 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await mutation.mutateAsync({ username, password });
-      await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
-      alert("ログイン成功！");
-      navigate("/");
-    } catch (err) {
-      alert("ログイン失敗：" + (err as Error).message);
-    }
-  };
+app.use(cookieParser());
+app.use(authMiddleware);
+app.use(csrfMiddleware);
 
 
-  return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl mb-4">ログイン</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          className="border p-2 w-full"
-          type="text"
-          placeholder="ユーザー名"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          className="border p-2 w-full"
-          type="password"
-          placeholder="パスワード"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">
-          ログイン
-        </button>
-      </form>
-    </div>
-  );
-}
--e \n```
--e \n---\n### ./client/app/routes/fruits.$id.tsx\n```ts
-import { useLoaderData, Link } from "@remix-run/react";
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import superjson from "superjson";
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST'],
+  credentials: true
+}));
 
-import { appRouter } from "../../../server/src/trpc/index.js";
+app.use('/trpc', createExpressMiddleware({
+  router: appRouter,
+  createContext,
+}));
 
-export async function loader({ params }: LoaderFunctionArgs) {
-  const id = Number(params.id);
-
-  if (!params.id || isNaN(id)) {
-    throw new Response("Invalid fruit ID", { status: 400 });
-  }
-
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {},
-    transformer: superjson,
-  });
-
-  try {
-    const fruit = await helpers.getFruitById.fetch(id);
-    return ({ fruit });
-  } catch (error) {
-    console.error(`Error loading fruit ${id}:`, error);
-    throw new Response("Fruit not found", { status: 404 });
-  }
-}
-
-export default function FruitDetail() {
-  const { fruit } = useLoaderData<typeof loader>();
-
-  return (
-    <div className="container mx-auto p-4">
-      <Link to="/" className="text-blue-500 hover:underline mb-4 inline-block">
-        ← Back to fruits list
-      </Link>
-      <div className="mt-4 p-6 border rounded shadow-sm">
-        <h1 className="text-3xl font-bold mb-4">{fruit.name}</h1>
-        <p className="text-lg mb-2">
-          Color: <span style={{ color: fruit.color }}>{fruit.color}</span>
-        </p>
-        <p className="text-lg mb-2">Price: {fruit.price} </p>
-      </div>
-    </div>
-  );
-}
--e \n```
--e \n---\n### ./client/app/routes/register.tsx\n```ts
-// client/app/routes/register.tsx
-import { useState } from "react";
-import { trpc } from "../lib/trpc";
-import { useNavigate } from "@remix-run/react";
-
-export default function Register() {
-  const navigate = useNavigate();
-  const mutation = trpc.user.register.useMutation();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await mutation.mutateAsync({ username, password });
-      alert("登録完了！");
-      navigate("/"); // トップページなどに遷移
-    } catch (err) {
-      alert("登録失敗：" + (err as Error).message);
-    }
-  };
-
-  return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl mb-4">ユーザー登録</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          className="border p-2 w-full"
-          type="text"
-          placeholder="ユーザー名"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          className="border p-2 w-full"
-          type="password"
-          placeholder="パスワード"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">
-          登録
-        </button>
-      </form>
-    </div>
-  );
-}
--e \n```
--e \n---\n### ./client/app/routes/secret.tsx\n```ts
-// client/app/routes/secret.tsx
-import { useMe } from "../hooks/useMe";
-import { Link } from "@remix-run/react";
-
-export default function SecretPage() {
-  const { data: me, isLoading, error } = useMe();
-
-  if (isLoading) return <p>Loading...</p>;
-
-  if (error) {
-    return (
-      <div className="p-4">
-        <p className="text-red-500">このページはログインが必要です。</p>
-        <Link to="/login" className="text-blue-500 underline">
-          ログインへ
-        </Link>
-      </div>
-    );
-  }
-
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Secret Page 🔐</h1>
-      <p>こんにちは、<span className="font-semibold">{me.username}</span> さん！</p>
-      <p>このページはログインユーザーしか見れません。</p>
-    </div>
-  );
-}
--e \n```
--e \n---\n### ./client/app/routes/_index.tsx\n```ts
-// client/app/routes/_index.tsx
-
-import { Link } from '@remix-run/react';
-import { trpc } from '../lib/trpc';
-
-export default function Index() {
-  const { data: fruits, isLoading, error } = trpc.getFruits.useQuery();
-
-  return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-end space-x-4 mb-4">
-        <Link to="/register" className="text-blue-500 hover:underline">
-          Register
-        </Link>
-        <Link to="/login" className="text-blue-500 hover:underline">
-          Login
-        </Link>
-      </div>
-
-      <h1 className="mb-4 text-2xl font-bold">Fruit List</h1>
-
-      {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {error.message}</p>}
-      {!fruits || fruits.length === 0 ? (
-        <p>No fruits available</p>
-      ) : (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {fruits.map((fruit) => (
-            <div key={fruit.id} className="rounded border p-4 shadow-sm">
-              <Link to={`/fruits/${fruit.id}`} className="block hover:underline">
-                <h2 className="text-xl font-semibold">{fruit.name}</h2>
-                <p>
-                  Color: <span style={{ color: fruit.color }}>{fruit.color}</span>
-                </p>
-                <p>Price: {fruit.price}</p>
-              </Link>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-}
--e \n```
--e \n---\n### ./server/src/middleware/csrf.ts\n```ts
-// server/src/middleware/csrf.ts
-import { randomBytes } from 'crypto';
-import type { Request, Response, NextFunction } from 'express';
-
-export function csrfMiddleware(req: Request, res: Response, next: NextFunction) {
-  const token = randomBytes(32).toString('hex');
-
-  // サーバーが CSRF トークンをクッキーにセット
-  res.cookie('csrf-token', token, {
-    httpOnly: false, // JS からアクセス可能にする
-    sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
-  });
-
-  // 次の middleware / handler で使えるようにする
-  (req as any).csrfToken = token;
-
-  next();
-}
--e \n```
--e \n---\n### ./server/src/middleware/auth.ts\n```ts
-// server/src/middleware/auth.ts
-import jwt from 'jsonwebtoken';
-import type { Request, Response, NextFunction } from 'express';
-const JWT_SECRET = process.env.JWT_SECRET!;
-
-export function authMiddleware(req: Request, res: Response, next: NextFunction) {
-  const token = req.cookies?.jwt;
-  if (token) {
-    try {
-      const decoded = jwt.verify(token, JWT_SECRET) as { id: string; username: string };
-      req.user = { id: decoded.id, username: decoded.username };
-    } catch (err) {
-      console.error('JWT verification failed:', err);
-    }
-  }
-  next();
-}
--e \n```
--e \n---\n### ./server/src/db.json\n```ts
-{
-  "users": [
-    {
-      "id": "KVLnXSMduxpU3ObVsKPS7",
-      "username": "shogo",
-      "password": "aiueo"
-    }
-  ]
-}
--e \n```
--e \n---\n### ./server/src/trpc/context.ts\n```ts
-// server/src/trpc/context.ts
-import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
-
-export function createContext({ req, res }: CreateExpressContextOptions) {
-  const csrfHeader = req.headers['x-csrf-token'];
-  const csrfCookie = req.cookies['csrf-token'];
-
-
-  if (req.method !== 'GET' && csrfHeader !== csrfCookie) {
-    throw new Error('CSRF token mismatch');
-  }
-
-  return {
-    req,
-    res,
-    user: req.user,
-  };
-}
-
-export type Context = ReturnType<typeof createContext>;
--e \n```
--e \n---\n### ./server/src/trpc/a.ts\n```ts
-import type { Request } from 'express';
-
-const test = (req: Request) => {
-  req.user // ← ここで補完が出れば成功！
-};
--e \n```
--e \n---\n### ./server/src/trpc/index.ts\n```ts
+app.listen(PORT, () => {
+  console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
+});
+-e 
+```
+-e 
+---
+### ./server/src/trpc/index.ts
+```ts
 // server/src/trpc/index.ts
 
 import { initTRPC } from "@trpc/server";
@@ -765,74 +376,38 @@ export const appRouter = t.router({
 });
 
 export type AppRouter = typeof appRouter;
--e \n```
--e \n---\n### ./server/src/models/user.ts\n```ts
-import fs from 'fs/promises';
-import { nanoid } from 'nanoid';
-import { z } from 'zod';
+-e 
+```
+-e 
+---
+### ./server/src/trpc/context.ts
+```ts
+// server/src/trpc/context.ts
+import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
 
-const dbUrl = new URL('../db.json', import.meta.url); 
+export function createContext({ req, res }: CreateExpressContextOptions) {
+  const csrfHeader = req.headers['x-csrf-token'];
+  const csrfCookie = req.cookies['csrf-token'];
 
-// Zodスキーマと型を一体化
-export const UserSchema = z.object({
-  id: z.string(),
-  username: z.string().min(1),
-  password: z.string().min(1),
-});
-export type User = z.infer<typeof UserSchema>;
 
-async function readDB(): Promise<{ users: User[] }> {
-  try {
-    const data = await fs.readFile(dbUrl, 'utf-8');
-    if (!data.trim()) return { users: [] };
-
-    const parsed = JSON.parse(data);
-    // バリデーション（必要であれば）
-    if (!Array.isArray(parsed.users)) return { users: [] };
-
-    // データ型保証（オプション）
-    const validatedUsers = parsed.users.map((u: any) => UserSchema.parse(u));
-    return { users: validatedUsers };
-  } catch (err: any) {
-    if (err.code === 'ENOENT') return { users: [] };
-    throw err;
-  }
-}
-
-async function writeDB(data: { users: User[] }) {
-  await fs.writeFile(dbUrl, JSON.stringify(data, null, 2), 'utf-8');
-}
-
-export async function registerUser(username: string, password: string): Promise<User> {
-  const db = await readDB();
-
-  if (db.users.find((u) => u.username === username)) {
-    throw new Error('ユーザー名はすでに使われています');
+  if (req.method !== 'GET' && csrfHeader !== csrfCookie) {
+    throw new Error('CSRF token mismatch');
   }
 
-  const user = UserSchema.parse({
-    id: nanoid(),
-    username,
-    password,
-  });
-
-  db.users.push(user);
-  await writeDB(db);
-  return user;
+  return {
+    req,
+    res,
+    user: req.user,
+  };
 }
 
-export async function loginUser(username: string, password: string): Promise<User> {
-  const db = await readDB();
-  const user = db.users.find((u) => u.username === username && u.password === password);
-
-  if (!user) {
-    throw new Error('ユーザー名またはパスワードが間違っています');
-  }
-
-  return user;
-}
--e \n```
--e \n---\n### ./server/src/models/fruit.ts\n```ts
+export type Context = ReturnType<typeof createContext>;
+-e 
+```
+-e 
+---
+### ./server/src/models/fruit.ts
+```ts
 export interface Fruit {
   id: number;
   name: string;
@@ -848,40 +423,5 @@ export const fruits: Fruit[] = [
   { id: 4, name: 'Orange', color: 'Orange', price: 150 },
   { id: 5, name: 'Strawberry', color: 'Red', price: 400 }
 ];
--e \n```
--e \n---\n### ./server/src/index.ts\n```ts
-// server/src/index.ts
-import express from 'express';
-import cors from 'cors';
-import { appRouter } from './trpc/index.js';
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { authMiddleware } from './middleware/auth.js';
-import { csrfMiddleware } from './middleware/csrf.js';
-import cookieParser from 'cookie-parser';
-import { createContext } from './trpc/context.js';
-import dotenv from 'dotenv';
-dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT ?? 3010;
-
-app.use(cookieParser());
-app.use(authMiddleware);
-app.use(csrfMiddleware);
-
-
-app.use(cors({
-  origin: true,
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
-
-app.use('/trpc', createExpressMiddleware({
-  router: appRouter,
-  createContext,
-}));
-
-app.listen(PORT, () => {
-  console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
-});
--e \n```
+-e 
+```

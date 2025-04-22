@@ -14,7 +14,8 @@ export default function Login() {
     e.preventDefault();
     try {
       await mutation.mutateAsync({ username, password });
-      await queryClient.invalidateQueries({ queryKey: ["user", "me"] });
+      await queryClient.invalidateQueries({ queryKey: [['user', 'me']] });
+
       alert("ログイン成功！");
       navigate("/");
     } catch (err) {
