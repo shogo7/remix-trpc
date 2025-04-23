@@ -41,8 +41,8 @@
 ```ts
 // client/app/routes/_index.tsx
 
-import { Link } from '@remix-run/react';
-import { trpc } from '../lib/trpc';
+import { Link } from "@remix-run/react";
+import { trpc } from "../lib/trpc";
 
 export default function Index() {
   const { data: fruits, isLoading, error } = trpc.getFruits.useQuery();
@@ -67,11 +67,18 @@ export default function Index() {
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {fruits.map((fruit) => (
-            <div key={fruit.id} className="rounded border p-4 shadow-sm">
-              <Link to={`/fruits/${fruit.id}`} className="block hover:underline">
+            <div
+              key={fruit._id.toString()}
+              className="rounded border p-4 shadow-sm"
+            >
+              <Link
+                to={`/fruits/${fruit._id}`}
+                className="block hover:underline"
+              >
                 <h2 className="text-xl font-semibold">{fruit.name}</h2>
                 <p>
-                  Color: <span style={{ color: fruit.color }}>{fruit.color}</span>
+                  Color:{" "}
+                  <span style={{ color: fruit.color }}>{fruit.color}</span>
                 </p>
                 <p>Price: {fruit.price}</p>
               </Link>
@@ -98,12 +105,12 @@ import type { Context } from '../../../server/src/trpc/context';
 import { appRouter } from "../../../server/src/trpc/index.js";
 
 export async function loader({ params }: LoaderFunctionArgs) {
-  const id = Number(params.id);
+  const id = params.id;
 
-  if (!params.id || isNaN(id)) {
+  if (!id || typeof id !== "string") {
     throw new Response("Invalid fruit ID", { status: 400 });
   }
-
+  
 
   const helpers = createServerSideHelpers({
     router: appRouter,
@@ -259,6 +266,10 @@ import cookieParser from 'cookie-parser';
 import { createContext } from './trpc/context.js';
 import dotenv from 'dotenv';
 dotenv.config();
+import mongoose from 'mongoose';
+
+const MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://localhost:27017/fruits';
+
 
 const app = express();
 const PORT = process.env.PORT ?? 3010;
@@ -279,9 +290,17 @@ app.use('/trpc', createExpressMiddleware({
   createContext,
 }));
 
-app.listen(PORT, () => {
-  console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
-});
+mongoose.connect(MONGODB_URI)
+  .then(() => {
+    console.log('🍃 Connected to MongoDB');
+    app.listen(PORT, () => {
+      console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
+    });
+  })
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1); // 接続できなければアプリも終了
+  });
 -e 
 ```
 -e 
@@ -292,7 +311,7 @@ app.listen(PORT, () => {
 
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
-import { fruits } from "../models/fruit.js";
+import { FruitModel } from '../models/fruit.js';
 import superjson from "superjson";
 import * as userModel from "../models/user.js";
 import jwt from "jsonwebtoken";
@@ -307,15 +326,15 @@ const t = initTRPC.context<Context>().create({
 });
 
 export const appRouter = t.router({
-  getFruits: t.procedure.query(() => {
-    return fruits;
+  getFruits: t.procedure.query(async () => {
+    return await FruitModel.find().lean(); // MongoDBから全件取得
   }),
-  getFruitById: t.procedure.input(z.number()).query((opts) => {
-    const fruit = fruits.find((f) => f.id === opts.input);
+  getFruitById: t.procedure.input(z.string()).query(async ({ input }) => {
+    const fruit = await FruitModel.findById(input).lean();
     if (!fruit) throw new Error("Not found");
     return fruit;
   }),
-  user: t.router({
+    user: t.router({
     register: t.procedure
       .input(
         z.object({
@@ -408,20 +427,22 @@ export type Context = ReturnType<typeof createContext>;
 ---
 ### ./server/src/models/fruit.ts
 ```ts
-export interface Fruit {
-  id: number;
+// server/src/models/fruit.ts
+import mongoose from 'mongoose';
+
+const fruitSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  color: { type: String, required: true },
+  price: { type: Number, required: true },
+});
+
+export const FruitModel = mongoose.model('Fruit', fruitSchema);
+
+export type Fruit = {
+  _id: string;
   name: string;
   color: string;
   price: number;
-}
-
-// Sample data
-export const fruits: Fruit[] = [
-  { id: 1, name: 'Apple', color: 'Red', price: 200 },
-  { id: 2, name: 'Banana', color: 'Yellow', price: 100 },
-  { id: 3, name: 'Grapes', color: 'Purple', price: 300 },
-  { id: 4, name: 'Orange', color: 'Orange', price: 150 },
-  { id: 5, name: 'Strawberry', color: 'Red', price: 400 }
-];
+};
 -e 
 ```

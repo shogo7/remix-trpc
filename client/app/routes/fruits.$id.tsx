@@ -1,37 +1,17 @@
 // client/app/routes/fruits.$id.tsx
 import { useLoaderData, Link } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import superjson from "superjson";
-import type { Context } from '../../../server/src/trpc/context';
+import { createServerTRPCClient } from "../lib/trpc.server.js";
 
-import { appRouter } from "../../../server/src/trpc/index.js";
-
-export async function loader({ params }: LoaderFunctionArgs) {
-  const id = Number(params.id);
-
-  if (!params.id || isNaN(id)) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
+  const id = params.id;
+  if (!id || typeof id !== "string") {
     throw new Response("Invalid fruit ID", { status: 400 });
   }
 
-
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {
-      req: {} as unknown as Context['req'],
-      res: {} as unknown as Context['res'],
-      user: null,
-    },
-    transformer: superjson,
-  });
-    
-  try {
-    const fruit = await helpers.getFruitById.fetch(id);
-    return ({ fruit });
-  } catch (error) {
-    console.error(`Error loading fruit ${id}:`, error);
-    throw new Response("Fruit not found", { status: 404 });
-  }
+  const trpc = createServerTRPCClient(request);
+  const fruit = await trpc.getFruitById.query(id);
+  return { fruit };
 }
 
 export default function FruitDetail() {

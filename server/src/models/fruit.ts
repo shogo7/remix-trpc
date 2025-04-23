@@ -1,16 +1,17 @@
 // server/src/models/fruit.ts
-export interface Fruit {
-  id: number;
+import mongoose from 'mongoose';
+
+const fruitSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  color: { type: String, required: true },
+  price: { type: Number, required: true },
+});
+
+export const FruitModel = mongoose.model('Fruit', fruitSchema);
+
+export type Fruit = {
+  _id: string;
   name: string;
   color: string;
   price: number;
-}
-
-// Sample data
-export const fruits: Fruit[] = [
-  { id: 1, name: 'Apple', color: 'Red', price: 200 },
-  { id: 2, name: 'Banana', color: 'Yellow', price: 100 },
-  { id: 3, name: 'Grapes', color: 'Purple', price: 300 },
-  { id: 4, name: 'Orange', color: 'Orange', price: 150 },
-  { id: 5, name: 'Strawberry', color: 'Red', price: 400 }
-];
+};

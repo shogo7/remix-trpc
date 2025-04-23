@@ -2,7 +2,7 @@
 
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
-import { fruits } from "../models/fruit.js";
+import { FruitModel } from '../models/fruit.js';
 import superjson from "superjson";
 import * as userModel from "../models/user.js";
 import jwt from "jsonwebtoken";
@@ -11,21 +11,24 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET!;
 import type { Context } from "./context.js";
 import type { Response as ExpressResponse } from "express";
+import mongoose from "mongoose";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
 });
 
 export const appRouter = t.router({
-  getFruits: t.procedure.query(() => {
-    return fruits;
+  getFruits: t.procedure.query(async () => {
+    return await FruitModel.find().lean(); // MongoDBから全件取得
   }),
-  getFruitById: t.procedure.input(z.number()).query((opts) => {
-    const fruit = fruits.find((f) => f.id === opts.input);
+  getFruitById: t.procedure.input(z.string()).query(async ({ input }) => {
+    console.log('Mongoose state:', mongoose.connection.readyState);
+
+    const fruit = await FruitModel.findById(input).lean();
     if (!fruit) throw new Error("Not found");
     return fruit;
   }),
-  user: t.router({
+    user: t.router({
     register: t.procedure
       .input(
         z.object({
