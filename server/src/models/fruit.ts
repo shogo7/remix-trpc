@@ -1,3 +1,4 @@
+// server/src/models/fruit.ts
 export interface Fruit {
   id: number;
   name: string;
