@@ -1,4 +1,5 @@
 # 📁 プロジェクト構成 (tree)
+
 ```
 ./client/app
 ├── components
@@ -9,6 +10,7 @@
 │   ├── useLogout.ts
 │   └── useMe.ts
 ├── lib
+│   ├── trpc.server.ts
 │   └── trpc.ts
 ├── root.tsx
 ├── routes
@@ -31,13 +33,17 @@
     ├── context.ts
     └── index.ts
 
-7 directories, 21 files
+7 directories, 22 files
 ```
--e 
+
+-e
+
 # 📄 ファイルの中身
--e 
----
-### ./client/app/routes/_index.tsx
+
+## -e
+
+### ./client/app/routes/\_index.tsx
+
 ```ts
 // client/app/routes/_index.tsx
 
@@ -89,46 +95,28 @@ export default function Index() {
     </div>
   );
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./client/app/routes/fruits.$id.tsx
+
 ```ts
 // client/app/routes/fruits.$id.tsx
 import { useLoaderData, Link } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { createServerSideHelpers } from "@trpc/react-query/server";
-import superjson from "superjson";
-import type { Context } from '../../../server/src/trpc/context';
+import { createServerTRPCClient } from "../lib/trpc.server.js";
 
-import { appRouter } from "../../../server/src/trpc/index.js";
-
-export async function loader({ params }: LoaderFunctionArgs) {
+export async function loader({ params, request }: LoaderFunctionArgs) {
   const id = params.id;
-
   if (!id || typeof id !== "string") {
     throw new Response("Invalid fruit ID", { status: 400 });
   }
-  
 
-  const helpers = createServerSideHelpers({
-    router: appRouter,
-    ctx: {
-      req: {} as unknown as Context['req'],
-      res: {} as unknown as Context['res'],
-      user: null,
-    },
-    transformer: superjson,
-  });
-    
-  try {
-    const fruit = await helpers.getFruitById.fetch(id);
-    return ({ fruit });
-  } catch (error) {
-    console.error(`Error loading fruit ${id}:`, error);
-    throw new Response("Fruit not found", { status: 404 });
-  }
+  const trpc = createServerTRPCClient(request);
+  const fruit = await trpc.getFruitById.query(id);
+  return { fruit };
 }
 
 export default function FruitDetail() {
@@ -149,22 +137,66 @@ export default function FruitDetail() {
     </div>
   );
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./client/app/lib/trpc.ts
+
 ```ts
 // client/app/lib/trpc.ts
-import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '../../../server/src/trpc'; 
+import { createTRPCReact } from "@trpc/react-query";
+import type { AppRouter } from "../../../server/src/trpc";
 
 export const trpc = createTRPCReact<AppRouter>();
--e 
+-e;
 ```
--e 
----
+
+## -e
+
+### ./client/app/lib/trpc.server.ts
+
+```ts
+// client/lib/trpc.server.ts.ts
+
+import { createTRPCClient, httpBatchLink } from "@trpc/client";
+import superjson from "superjson";
+import type { AppRouter } from "../../../server/src/trpc";
+
+export function createServerTRPCClient(request: Request) {
+  const cookie = request.headers.get("cookie") || "";
+  const csrfToken = cookie.match(/csrf-token=([^;]+)/)?.[1] ?? "";
+
+  const client = createTRPCClient<AppRouter>({
+    links: [
+      httpBatchLink({
+        url: "http://localhost:3010/trpc",
+        transformer: superjson, // ✅ ここに移動！
+        fetch(url, options) {
+          return fetch(url, {
+            ...options,
+            credentials: "include",
+            headers: {
+              ...options?.headers,
+              cookie,
+              "x-csrf-token": csrfToken,
+            },
+          });
+        },
+      }),
+    ],
+  });
+
+  return client;
+}
+-e;
+```
+
+## -e
+
 ### ./client/app/root.tsx
+
 ```ts
 // client/app/root.tsx
 
@@ -230,14 +262,14 @@ export default function App() {
             credentials: "include",
             headers: {
               ...options?.headers,
-              "x-csrf-token": csrfToken || "", 
+              "x-csrf-token": csrfToken || "",
             },
           });
         },
       }),
     ],
   });
-  
+
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
@@ -249,27 +281,31 @@ export default function App() {
     </trpc.Provider>
   );
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/index.ts
+
 ```ts
 // server/src/index.ts
-import express from 'express';
-import cors from 'cors';
-import { appRouter } from './trpc/index.js';
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { authMiddleware } from './middleware/auth.js';
-import { csrfMiddleware } from './middleware/csrf.js';
-import cookieParser from 'cookie-parser';
-import { createContext } from './trpc/context.js';
-import dotenv from 'dotenv';
+import express from "express";
+import cors from "cors";
+import { appRouter } from "./trpc/index.js";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { authMiddleware } from "./middleware/auth.js";
+import { csrfMiddleware } from "./middleware/csrf.js";
+import cookieParser from "cookie-parser";
+import { createContext } from "./trpc/context.js";
+import dotenv from "dotenv";
 dotenv.config();
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI ?? 'mongodb://localhost:27017/fruits';
-
+mongoose
+  .connect(process.env.MONGODB_URI!)
+  .then(() => console.log("🍃 Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 const app = express();
 const PORT = process.env.PORT ?? 3010;
@@ -278,40 +314,38 @@ app.use(cookieParser());
 app.use(authMiddleware);
 app.use(csrfMiddleware);
 
-
-app.use(cors({
-  origin: true,
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
-
-app.use('/trpc', createExpressMiddleware({
-  router: appRouter,
-  createContext,
-}));
-
-mongoose.connect(MONGODB_URI)
-  .then(() => {
-    console.log('🍃 Connected to MongoDB');
-    app.listen(PORT, () => {
-      console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
-    });
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST"],
+    credentials: true,
   })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-    process.exit(1); // 接続できなければアプリも終了
-  });
--e 
+);
+
+app.use(
+  "/trpc",
+  createExpressMiddleware({
+    router: appRouter,
+    createContext,
+  })
+);
+
+app.listen(PORT, () => {
+  console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
+});
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/trpc/index.ts
+
 ```ts
 // server/src/trpc/index.ts
 
 import { initTRPC } from "@trpc/server";
 import { z } from "zod";
-import { FruitModel } from '../models/fruit.js';
+import { FruitModel } from "../models/fruit.js";
 import superjson from "superjson";
 import * as userModel from "../models/user.js";
 import jwt from "jsonwebtoken";
@@ -320,6 +354,7 @@ dotenv.config();
 const JWT_SECRET = process.env.JWT_SECRET!;
 import type { Context } from "./context.js";
 import type { Response as ExpressResponse } from "express";
+import mongoose from "mongoose";
 
 const t = initTRPC.context<Context>().create({
   transformer: superjson,
@@ -330,11 +365,13 @@ export const appRouter = t.router({
     return await FruitModel.find().lean(); // MongoDBから全件取得
   }),
   getFruitById: t.procedure.input(z.string()).query(async ({ input }) => {
+    console.log("Mongoose state:", mongoose.connection.readyState);
+
     const fruit = await FruitModel.findById(input).lean();
     if (!fruit) throw new Error("Not found");
     return fruit;
   }),
-    user: t.router({
+  user: t.router({
     register: t.procedure
       .input(
         z.object({
@@ -343,7 +380,7 @@ export const appRouter = t.router({
         })
       )
       .mutation(async ({ input }) => {
-        return await userModel.registerUser(input.username, input.password);
+        return await userModel.register(input.username, input.password);
       }),
     login: t.procedure
       .input(
@@ -353,7 +390,7 @@ export const appRouter = t.router({
         })
       )
       .mutation(async ({ input, ctx }) => {
-        const user = await userModel.loginUser(input.username, input.password);
+        const user = await userModel.login(input.username, input.password);
 
         // JWT発行
         const token = jwt.sign(
@@ -369,7 +406,7 @@ export const appRouter = t.router({
         res.cookie("jwt", token, {
           httpOnly: true,
           secure: false, // 本番ではtrueにする（HTTPSのみ）
-          sameSite: 'strict',
+          sameSite: "strict",
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
@@ -381,7 +418,7 @@ export const appRouter = t.router({
       res.clearCookie("jwt", {
         httpOnly: true,
         secure: false, // 本番はtrue
-        sameSite: 'strict',
+        sameSite: "strict",
       });
 
       return { success: true };
@@ -395,22 +432,23 @@ export const appRouter = t.router({
 });
 
 export type AppRouter = typeof appRouter;
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/trpc/context.ts
+
 ```ts
 // server/src/trpc/context.ts
-import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 
 export function createContext({ req, res }: CreateExpressContextOptions) {
-  const csrfHeader = req.headers['x-csrf-token'];
-  const csrfCookie = req.cookies['csrf-token'];
+  const csrfHeader = req.headers["x-csrf-token"];
+  const csrfCookie = req.cookies["csrf-token"];
 
-
-  if (req.method !== 'GET' && csrfHeader !== csrfCookie) {
-    throw new Error('CSRF token mismatch');
+  if (req.method !== "GET" && csrfHeader !== csrfCookie) {
+    throw new Error("CSRF token mismatch");
   }
 
   return {
@@ -421,14 +459,16 @@ export function createContext({ req, res }: CreateExpressContextOptions) {
 }
 
 export type Context = ReturnType<typeof createContext>;
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/models/fruit.ts
+
 ```ts
 // server/src/models/fruit.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const fruitSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -436,7 +476,7 @@ const fruitSchema = new mongoose.Schema({
   price: { type: Number, required: true },
 });
 
-export const FruitModel = mongoose.model('Fruit', fruitSchema);
+export const FruitModel = mongoose.model("Fruit", fruitSchema);
 
 export type Fruit = {
   _id: string;
@@ -444,5 +484,5 @@ export type Fruit = {
   color: string;
   price: number;
 };
--e 
+-e;
 ```

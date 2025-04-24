@@ -12,7 +12,7 @@ export function createServerTRPCClient(request: Request) {
     links: [
       httpBatchLink({
         url: "http://localhost:3010/trpc",
-        transformer: superjson, // ✅ ここに移動！
+        transformer: superjson,
         fetch(url, options) {
           return fetch(url, {
             ...options,

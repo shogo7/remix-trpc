@@ -14,7 +14,7 @@ export default function Register() {
     try {
       await mutation.mutateAsync({ username, password });
       alert("登録完了！");
-      navigate("/"); // トップページなどに遷移
+      navigate("/"); 
     } catch (err) {
       alert("登録失敗：" + (err as Error).message);
     }

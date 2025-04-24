@@ -7,9 +7,9 @@ const fruitSchema = new mongoose.Schema({
   price: { type: Number, required: true },
 });
 
-export const FruitModel = mongoose.model('Fruit', fruitSchema);
+export const Fruit = mongoose.model('Fruit', fruitSchema);
 
-export type Fruit = {
+export type FruitType = {
   _id: string;
   name: string;
   color: string;

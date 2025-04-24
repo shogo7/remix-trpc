@@ -1,4 +1,5 @@
 {
+  echo "現在のTRPCを使ったフルスタックのプロジェクトですが、詳しく解説してもらえませんか？"
   echo "# 📁 プロジェクト構成 (tree)"
   echo '```'
   tree ./client/app ./server/src -I node_modules
@@ -10,6 +11,7 @@
     "./client/app/routes/_index.tsx"
     "./client/app/routes/fruits.\$id.tsx"
     "./client/app/lib/trpc.ts"
+    "./client/app/lib/trpc.server.ts"
     "./client/app/root.tsx"
     "./server/src/index.ts"
     "./server/src/trpc/index.ts"
