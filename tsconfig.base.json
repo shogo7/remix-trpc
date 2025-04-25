@@ -1,0 +1,25 @@
+// tsconfig.base.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler", // Client向け（serverでは上書き可）
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+        "@client/*": ["client/app/*"],
+        "@server/*": ["server/src/*"],
+        "@shared/*": ["shared/*"]
+      },
+  
+    "noEmit": true
+  }
+}

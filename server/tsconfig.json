@@ -1,13 +1,11 @@
+// server/tsconfig.json
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2020",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "target": "ES2020",
-    "esModuleInterop": true,
-    "strict": true,
-    "strictNullChecks": true,
-    "typeRoots": ["./node_modules/@types", "./server/types"]
-
+    "typeRoots": ["./node_modules/@types", "./types"],
   },
-"include": ["src", "types", "server"]
+  "include": ["src", "types"]
 }

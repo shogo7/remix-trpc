@@ -2,7 +2,7 @@
 
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
-import type { AppRouter } from "../../../server/src/trpc";
+import type { AppRouter } from "@server/trpc";
 
 export function createServerTRPCClient(request: Request) {
   const cookie = request.headers.get("cookie") || "";
