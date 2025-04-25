@@ -45,10 +45,9 @@ export const appRouter = t.router({
       )
       .mutation(async ({ input, ctx }) => {
         const user = await userController.login(input.username, input.password);
-
         // JWT発行
         const token = jwt.sign(
-          { id: user.id, username: user.username },
+          { id: user._id, username: user.username },
           JWT_SECRET,
           {
             expiresIn: "7d",
@@ -63,7 +62,7 @@ export const appRouter = t.router({
           maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        return { id: user.id, username: user.username };
+        return { id: user._id, username: user.username };
       }),
     logout: t.procedure.mutation(({ ctx }) => {
       const res = ctx.res as ExpressResponse;

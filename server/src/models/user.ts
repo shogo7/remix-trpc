@@ -6,3 +6,9 @@ const userSchema = new mongoose.Schema({
 });
 
 export const User = mongoose.model("User", userSchema);
+
+export type UserType = {
+  _id: string;
+  username: string;
+  password: string;
+};
