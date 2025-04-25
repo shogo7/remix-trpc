@@ -4,7 +4,7 @@ import { Link } from "@remix-run/react";
 import { trpc } from "../lib/trpc";
 
 export default function Index() {
-  const { data: fruits, isLoading, error } = trpc.getFruits.useQuery();
+  const { data: fruits, isLoading, error } = trpc.fruit.getFruits.useQuery();
 
   return (
     <div className="container mx-auto p-4">

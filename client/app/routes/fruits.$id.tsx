@@ -10,7 +10,7 @@ export async function loader({ params, request }: LoaderFunctionArgs) {
   }
 
   const trpc = createServerTRPCClient(request);
-  const fruit = await trpc.getFruitById.query(id);
+  const fruit = await trpc.fruit.getFruitById.query(id);
   return { fruit };
 }
 
