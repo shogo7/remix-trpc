@@ -13,7 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "isolatedModules": true,
-    "noUnusedLocals": false,
     "baseUrl": ".",
     "paths": {
         "@client/*": ["client/app/*"],
