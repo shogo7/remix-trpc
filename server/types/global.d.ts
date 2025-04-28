@@ -5,9 +5,7 @@ declare global {
   namespace Express {
     interface Request {
       user?: Pick<User, "id" | "username">;
-      apple?: Pick<User, "id" | "username">;
-      banana: Pick<User, "id" | "username">;
-
+      csrfToken?: string;
     }
   }
 }

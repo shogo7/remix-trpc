@@ -13,7 +13,7 @@ export function csrfMiddleware(req: Request, res: Response, next: NextFunction) 
   });
 
   // 次の middleware / handler で使えるようにする
-  (req as any).csrfToken = token;
+  req.csrfToken = token;
 
   next();
 }
