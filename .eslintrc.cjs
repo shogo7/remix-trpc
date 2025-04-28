@@ -24,6 +24,15 @@ module.exports = {
   // Base config
   extends: ["eslint:recommended"],
 
+  // プロジェクト全体の設定にTypeScriptのパス解決を追加
+  settings: {
+    "import/resolver": {
+      typescript: {
+        project: ["tsconfig.base.json", "client/tsconfig.json", "server/tsconfig.json", "shared/tsconfig.json"],
+      },
+    },
+  },
+
   overrides: [
     // React
     {
@@ -63,6 +72,7 @@ module.exports = {
           },
           typescript: {
             alwaysTryTypes: true,
+            project: ["tsconfig.base.json", "client/tsconfig.json", "server/tsconfig.json", "shared/tsconfig.json"],
           },
         },
       },
