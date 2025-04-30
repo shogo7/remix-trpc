@@ -2,11 +2,9 @@
 
 import { Link } from "@remix-run/react";
 import { trpc } from "../lib/trpc";
-import { formatDate } from "@shared/dateUtils";
 
 export default function Index() {
   const { data: fruits, isLoading, error } = trpc.fruit.getFruits.useQuery();
-  const today = formatDate(new Date());
 
 
   return (
@@ -19,7 +17,6 @@ export default function Index() {
           Login
         </Link>
       </div>
-      <div>Today is {today}</div>
       <h1 className="mb-4 text-2xl font-bold">Fruit List</h1>
 
       {isLoading && <p>Loading...</p>}

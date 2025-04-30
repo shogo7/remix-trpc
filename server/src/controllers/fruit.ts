@@ -1,9 +1,7 @@
 // controllers/fruit.ts
 import { Fruit } from "../models/fruit.js";
 import type { FruitType } from "../models/fruit.js";
-import { formatDate } from "@shared/dateUtils.js";
 
-console.log(formatDate(new Date()));
 
 export async function getAllFruits(): Promise<FruitType[]> {
   const fruits = await Fruit.find().lean();

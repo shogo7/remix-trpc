@@ -137,7 +137,8 @@ packages:
   "private": true,
   "main": "index.ts",
   "dependencies": {
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "zod": "^3.24.2"
   }
 }-e 
 ```
@@ -158,6 +159,7 @@ packages:
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@remix-run/node": "^2.16.5",
     "@remix-run/react": "^2.16.5",
     "@remix-run/serve": "^2.16.5",
@@ -170,6 +172,8 @@ packages:
     "js-cookie": "^3.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.56.1",
+    "sonner": "^2.0.3",
     "superjson": "^2.2.2",
     "zod": "^3.24.2"
   },
@@ -225,7 +229,8 @@ import { formatDate } from "@shared/dateUtils";
 export default function Index() {
   const { data: fruits, isLoading, error } = trpc.fruit.getFruits.useQuery();
   const today = formatDate(new Date());
-  
+
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-end space-x-4 mb-4">
@@ -379,7 +384,8 @@ import superjson from "superjson";
 import { trpc } from "./lib/trpc";
 import "./tailwind.css";
 import Header from "./components/Header";
-import Cookies from "js-cookie"; // これを追加！
+import Cookies from "js-cookie"; 
+import { Toaster } from "sonner";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -442,6 +448,7 @@ export default function App() {
         <main className="p-4">
           <Outlet />
         </main>
+        <Toaster richColors position="top-center" />
       </QueryClientProvider>
     </trpc.Provider>
   );
