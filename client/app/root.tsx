@@ -14,7 +14,8 @@ import superjson from "superjson";
 import { trpc } from "./lib/trpc";
 import "./tailwind.css";
 import Header from "./components/Header";
-import Cookies from "js-cookie"; // これを追加！
+import Cookies from "js-cookie"; 
+import { Toaster } from "sonner";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -77,6 +78,7 @@ export default function App() {
         <main className="p-4">
           <Outlet />
         </main>
+        <Toaster richColors position="top-center" />
       </QueryClientProvider>
     </trpc.Provider>
   );

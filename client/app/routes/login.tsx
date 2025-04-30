@@ -4,7 +4,7 @@ import { trpc } from "../lib/trpc";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, LoginInput } from "@shared/schemas/user.schema";
-
+import { toast } from "sonner"; 
 
 export default function Login() {
   const navigate = useNavigate();
@@ -23,10 +23,10 @@ export default function Login() {
     try {
       await mutation.mutateAsync(data);
       await queryClient.invalidateQueries({ queryKey: [["user", "me"]] });
-      alert("ログイン成功！");
+      toast.success("ログイン成功！");
       navigate("/");
     } catch (err) {
-      alert("ログイン失敗：" + (err as Error).message);
+      toast.error("ログイン失敗：" + (err as Error).message);
     }
   };
 

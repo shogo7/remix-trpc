@@ -7,7 +7,8 @@ import { formatDate } from "@shared/dateUtils";
 export default function Index() {
   const { data: fruits, isLoading, error } = trpc.fruit.getFruits.useQuery();
   const today = formatDate(new Date());
-  
+
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-end space-x-4 mb-4">
