@@ -21,4 +21,7 @@ export default defineConfig({
     }),
     tsconfigPaths(),
   ],
+  optimizeDeps: {
+    exclude: ["@hookform/resolvers"], // 👈 ここにエラーが出たパッケージ名を追加
+  },
 });
