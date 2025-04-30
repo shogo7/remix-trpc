@@ -45,16 +45,187 @@
 # 📄 ファイルの中身
 -e 
 ---
+### ./package.json
+```ts
+{
+  "name": "remix-trpc",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "client",
+    "server",
+    "shared"
+  ],
+  "scripts": {
+    "dev": "pnpm --filter client dev & pnpm --filter server dev",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.31.1",
+    "@typescript-eslint/parser": "^8.31.1",
+    "eslint": "^8.38.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0"
+  }
+}
+-e 
+```
+-e 
+---
+### ./pnpm-workspace.yaml
+```ts
+packages:
+  - './client'
+  - './server'
+  - './shared'
+
+-e 
+```
+-e 
+---
+### ./tsconfig.base.json
+```ts
+// tsconfig.base.json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler", // Client向け（serverでは上書き可）
+    "lib": ["DOM", "DOM.Iterable", "ES2022"],
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "isolatedModules": true,
+    "baseUrl": ".",
+    "paths": {
+        "@client/*": ["client/app/*"],
+        "@server/*": ["server/src/*"],
+        "@shared/*": ["shared/*"]
+      },
+  
+    "noEmit": true
+  }
+}
+-e 
+```
+-e 
+---
+### ./shared/tsconfig.json
+```ts
+{
+    "extends": "../tsconfig.base.json",
+    "include": ["**/*.ts", "dateUtils.ts"]
+  }
+  -e 
+```
+-e 
+---
+### ./shared/package.json
+```ts
+{
+  "name": "shared",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "main": "index.ts",
+  "dependencies": {
+    "dayjs": "^1.11.13"
+  }
+}-e 
+```
+-e 
+---
+### ./client/package.json
+```ts
+{
+  "name": "client",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "remix vite:dev",
+    "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "start": "remix-serve ./build/server/index.js",
+    "typecheck": "tsc"
+  },
+  "dependencies": {
+    "@remix-run/node": "^2.16.5",
+    "@remix-run/react": "^2.16.5",
+    "@remix-run/serve": "^2.16.5",
+    "@tanstack/react-query": "^5.72.2",
+    "@trpc/client": "^11.0.4",
+    "@trpc/react-query": "^11.0.4",
+    "@trpc/server": "^11.0.4",
+    "@types/js-cookie": "^3.0.6",
+    "isbot": "^4.1.0",
+    "js-cookie": "^3.0.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "superjson": "^2.2.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.16.5",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.7.4",
+    "@typescript-eslint/parser": "^6.7.4",
+    "autoprefixer": "^10.4.19",
+    "eslint": "^8.38.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsx-a11y": "^6.7.1",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.1.6",
+    "vite": "^6.0.0",
+    "vite-tsconfig-paths": "^4.2.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
+-e 
+```
+-e 
+---
+### ./client/tsconfig.json
+```ts
+// client/tsconfig.json
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["@remix-run/node", "vite/client"],
+    "moduleResolution": "Bundler", // Vite に最適な形式,
+  },
+}
+-e 
+```
+-e 
+---
 ### ./client/app/routes/_index.tsx
 ```ts
 // client/app/routes/_index.tsx
 
 import { Link } from "@remix-run/react";
 import { trpc } from "../lib/trpc";
+import { formatDate } from "@shared/dateUtils";
 
 export default function Index() {
   const { data: fruits, isLoading, error } = trpc.fruit.getFruits.useQuery();
-
+  const today = formatDate(new Date());
+  
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-end space-x-4 mb-4">
@@ -65,7 +236,7 @@ export default function Index() {
           Login
         </Link>
       </div>
-
+      <div>Today is {today}</div>
       <h1 className="mb-4 text-2xl font-bold">Fruit List</h1>
 
       {isLoading && <p>Loading...</p>}
@@ -145,7 +316,7 @@ export default function FruitDetail() {
 ```ts
 // client/app/lib/trpc.ts
 import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '../../../server/src/trpc'; 
+import type { AppRouter } from '@server/trpc'; 
 
 export const trpc = createTRPCReact<AppRouter>();
 -e 
@@ -158,7 +329,7 @@ export const trpc = createTRPCReact<AppRouter>();
 
 import { createTRPCClient, httpBatchLink } from "@trpc/client";
 import superjson from "superjson";
-import type { AppRouter } from "../../../server/src/trpc";
+import type { AppRouter } from "@server/trpc";
 
 export function createServerTRPCClient(request: Request) {
   const cookie = request.headers.get("cookie") || "";
@@ -274,6 +445,70 @@ export default function App() {
       </QueryClientProvider>
     </trpc.Provider>
   );
+}
+-e 
+```
+-e 
+---
+### ./server/package.json
+```ts
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "Fruit API server",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "type": "module",
+  "main": "./dist/index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@trpc/client": "^11.0.4",
+    "@trpc/react-query": "^11.0.4",
+    "@trpc/server": "^11.0.4",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.2",
+    "nanoid": "^5.1.5",
+    "superjson": "^2.2.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
+    "@types/cors": "^2.8.13",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^18.15.11",
+    "ts-node-dev": "^2.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.0.4"
+
+  }
+}
+-e 
+```
+-e 
+---
+### ./server/tsconfig.json
+```ts
+// server/tsconfig.json
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "typeRoots": ["./node_modules/@types", "./types"],
+  },
+  "include": ["src", "types"]
 }
 -e 
 ```

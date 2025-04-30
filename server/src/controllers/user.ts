@@ -1,8 +1,6 @@
 import { User } from "../models/user.js";
 import type { UserType } from "../models/user.js";
 
-import { nanoid } from "nanoid";
-
 export const register = async (
   username: string,
   password: string
