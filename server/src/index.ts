@@ -9,6 +9,12 @@ import cookieParser from 'cookie-parser';
 import { createContext } from './trpc/context.js';
 import dotenv from 'dotenv';
 dotenv.config();
+import mongoose from 'mongoose';
+
+
+mongoose.connect(process.env.MONGODB_URI!)
+  .then(() => console.log('🍃 Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const app = express();
 const PORT = process.env.PORT ?? 3010;

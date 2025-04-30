@@ -11,7 +11,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
       req.user = { id: decoded.id, username: decoded.username };
     } catch (err) {
       console.error('JWT verification failed:', err);
+      req.user = undefined;
     }
+  } else {
+    req.user = undefined;
   }
+
   next();
 }
