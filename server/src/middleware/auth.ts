@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 const JWT_SECRET = process.env.JWT_SECRET!;
 
+// jwtチェック＆user を注入するだけ（全ルートに適用）
 export function attachUserFromJwt(
   req: Request,
   res: Response,

@@ -12,16 +12,16 @@ export default defineConfig({
   plugins: [
     remix({
       future: {
-        v3_fetcherPersist: true,
-        v3_relativeSplatPath: true,
-        v3_throwAbortReason: true,
-        v3_singleFetch: true,
-        v3_lazyRouteDiscovery: true,
+        v3_fetcherPersist: true, // <Fetcher /> の状態がルート変更後も持続する
+        v3_relativeSplatPath: true, // "*"が相対パスで動く
+        v3_throwAbortReason: true, // フェッチのキャンセル理由がわかる。
+        v3_singleFetch: true, // 1回のAPIリクエストにまとめられる
+        v3_lazyRouteDiscovery: true, // アクセスされたルートだけ読み込む
       },
     }),
-    tsconfigPaths(),
+    tsconfigPaths(), // ts の paths 設定（例: @/components/*）を Vite に認識させる(ビルド時)
   ],
   optimizeDeps: {
-    exclude: ["@hookform/resolvers"], // 👈 ここにエラーが出たパッケージ名を追加
+    exclude: ["@hookform/resolvers"], // 事前バンドルから除外（ESM非対応ライブラリ）
   },
 });
