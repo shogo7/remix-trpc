@@ -4,6 +4,7 @@ import * as userController from "../../controllers/user.js";
 import jwt from "jsonwebtoken";
 import type { Response as ExpressResponse } from "express";
 import { loginSchema, registerSchema } from "@shared/schemas/user.schema.js";
+import { protectedProcedure } from '../utils.js';
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -42,8 +43,7 @@ export const userRouter = t.router({
 
     return { success: true };
   }),
-  me: t.procedure.query(({ ctx }) => {
-    if (!ctx.user) throw new Error("未ログインです");
+  me: protectedProcedure.query(({ ctx }) => {
     return ctx.user;
   }),
 });

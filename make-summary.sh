@@ -26,6 +26,8 @@
     "./server/src/trpc/index.ts"
     "./server/src/trpc/context.ts"
     "./server/src/models/fruit.ts"
+    "./server/types/global.d.ts"
+    
   )
 
   for file in "${files[@]}"; do
