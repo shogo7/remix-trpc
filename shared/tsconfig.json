@@ -1,3 +1,4 @@
+// shared/tsconfig.json
 {
     "extends": "../tsconfig.base.json",
     "include": ["**/*.ts", "dateUtils.ts"]
