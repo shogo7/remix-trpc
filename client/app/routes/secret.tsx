@@ -21,7 +21,7 @@ export default function SecretPage() {
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Secret Page 🔐</h1>
-      <p>こんにちは、<span className="font-semibold">{me.username}</span> さん！</p>
+      <p>こんにちは、<span className="font-semibold">{me?.username ?? "ゲスト"}</span> さん！</p>
       <p>このページはログインユーザーしか見れません。</p>
     </div>
   );
