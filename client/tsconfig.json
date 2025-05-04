@@ -4,5 +4,6 @@
   "compilerOptions": {
     "types": ["@remix-run/node", "vite/client"],
     "moduleResolution": "Bundler", // Vite に最適な形式,
+    "noEmit": true
   },
 }
