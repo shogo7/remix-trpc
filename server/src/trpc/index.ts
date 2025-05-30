@@ -2,10 +2,12 @@
 import { t } from "./trpc.js";
 import { fruitRouter } from "./routers/fruit.js";
 import { userRouter } from "./routers/user.js";
+import { postRouter } from "./routers/post.js";
 
 export const appRouter = t.router({
   fruit: fruitRouter,
   user: userRouter,
+  post: postRouter,
 });
 
 export type AppRouter = typeof appRouter;
