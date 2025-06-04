@@ -27,6 +27,5 @@ export function createServerTRPCClient(request: Request) {
       }),
     ],
   });
-
   return client;
 }

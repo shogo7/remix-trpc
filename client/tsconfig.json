@@ -4,11 +4,17 @@
   "compilerOptions": {
     "types": ["@remix-run/node", "vite/client"],
     "moduleResolution": "Bundler", // Vite に最適な形式,
-    "noEmit": true
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./app/*"],
+      "@shared/*": ["../shared/*"],
+      "@server/*": ["../server/src/*"]
+    }
   },
   "include": [
     "./**/*",
-    "../server/types" // ← 明示的に含める (ちなみにserverだけにしてもできるか試す。)
+    "../server/types" // ← 明示的に含める 
   ],
-
+  "exclude": ["node_modules"]
 }

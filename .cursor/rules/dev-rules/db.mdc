@@ -1,0 +1,225 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# データベース設計ルール（MongoDB + Mongoose）
+
+## 使用技術と管理方針
+
+- データベースは **MongoDB Atlas** を使用
+- ODM は **Mongoose** を使用
+- モデル定義は `server/src/models` に配置
+
+
+## モデルの命名規則
+
+- ファイル名は **小文字のスネークケース**（例: `user.ts`, `music_track.ts`）
+- モデル名（`mongoose.model()`）は **単数形のパスカルケース**（例: `User`, `MusicTrack`）
+
+
+## コレクションの命名規則
+
+- MongoDB上のコレクション名は **複数形のスネークケース**
+  - 例: `users`, `music_tracks`, `fruit_logs`
+- 英語の不規則な複数形を避けるため、`mongoose.model()` の第3引数で明示的に指定してもよい
+  ```ts
+  mongoose.model("Person", personSchema, "people");
+
+
+## フィールドの命名規則
+
+- フィールド名は **キャメルケース**（例: `createdAt`, `userId`）
+- 主キーは MongoDB のデフォルト `_id`（`ObjectId`）を使用
+- 外部参照（リレーション）は **`userId: string`** または **`user: ObjectId`** のいずれかを用途に応じて使い分け
+
+
+## ドキュメント構造の設計指針
+
+- **Embed（埋め込み）**：データが **常に一緒に使われる場合**（例: コメントリスト付きの投稿）
+- **Reference（参照）**：データが **個別に取得・更新される場合**（例: ユーザー情報、タグなど）
+
+## バリデーション
+- Mongooseの`required`, `minLength`, `match`などを活用
+- ユーザー入力にはZodなどを併用して二重バリデーション
+
+## インデックス
+- `userId`, `email`, `createdAt` などに必要に応じてインデックスを追加
+- Compound Index はアクセスパターンを元に決定
+
+## マイグレーション
+- モデルバージョン (`schemaVersion`フィールド) を使う or
+- 独自マイグレーションスクリプトを記述して `db/patches/` に保存
+
+## その他
+- ObjectId か UUID をどちらに統一するか方針を決める
+- コレクション命名は複数形のスネークケース（例:`music_tracks`）
+
+## インポートルール
+- すべてのimport文では`.js`拡張子を明示的に指定する
+  ```typescript
+  // ✅ 良い例
+  import { Music } from "@shared/schemas/music.js";
+  
+  // ❌ 悪い例
+  import { Music } from "@shared/schemas/music";
+  ```
+
+
+## 1. モデル定義の分離
+
+### スキーマと型の定義
+- 場所: `shared/schemas/[resource].ts`
+- 内容:
+  - Zodスキーマ定義
+  - 型定義（`z.infer`を使用）
+  - バリデーションルール
+- 命名規則:
+  - ファイル名: 小文字のスネークケース（例: `book.ts`）
+  - スキーマ名: キャメルケース + `Schema`（例: `createBookSchema`）
+  - 型名: パスカルケース + `Type`（例: `BookType`）
+
+```typescript
+// shared/schemas/book.ts
+import { z } from "zod";
+
+export const createBookSchema = z.object({
+  title: z.string().min(1).max(100),
+  author: z.string().min(1).max(100),
+  publishedYear: z.number().min(1800).max(new Date().getFullYear()),
+});
+
+export type CreateBookType = z.infer<typeof createBookSchema>;
+```
+
+
+
+### MongoDBモデル定義
+- 場所: `server/src/models/[resource].ts`
+
+
+## 型とモデルの命名規則
+- ファイル名: snakecase（例: `music.ts`）
+- モデル名: PascalCase（例: `Music`）
+- 型名: PascalCase + Type（例: `MusicType`）
+- インターフェース: I + PascalCase + Document（例: `IMusicDocument`）
+
+
+```typescript
+// server/src/models/book.ts
+import mongoose, { Schema, Document } from "mongoose";
+import type { CreateBookType } from "@shared/schemas/book.js";
+
+export interface IBook extends Document, CreateBookType {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const bookSchema = new Schema<IBook>(
+  {
+    title: { type: String, required: true, maxlength: 100 },
+    author: { type: String, required: true, maxlength: 100 },
+    publishedYear: { type: Number, min: 1800, max: new Date().getFullYear() },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+bookSchema.index({ title: 1 });
+bookSchema.index({ author: 1 });
+bookSchema.index({ publishedYear: -1 });
+
+export const Book = mongoose.model<IBook>("Book", bookSchema);
+```
+
+## 2. モデル命名規則
+
+### モデル名
+- 単数形のパスカルケース
+- 例: `Book`, `User`, `Music`
+
+### フィールド名
+- キャメルケース
+- 例: `publishedYear`, `createdAt`, `updatedAt`
+
+### インデックス名
+- 自動生成されるインデックス名を使用
+- 複合インデックスの場合は`field1_1_field2_-1`の形式
+
+## 3. インデックス設計
+
+### 必須インデックス
+- `_id`: 自動的に作成
+- `createdAt`: 降順（-1）
+- `updatedAt`: 降順（-1）
+
+### 推奨インデックス
+- 検索条件として頻繁に使用されるフィールド
+- ソート条件として使用されるフィールド
+- ユニーク制約が必要なフィールド
+
+### インデックス作成ルール
+- 複合インデックスは使用頻度の高い順にフィールドを配置
+- 部分インデックスは必要な場合のみ使用
+- スパースインデックスはnull値を除外する場合に使用
+
+## 4. インポートルール
+
+### モデルのインポート
+- 型定義は`type`キーワードを使用
+- モデルは直接インポート
+
+```typescript
+// 正しい例
+import type { IBook } from "../models/book.js";
+import { Book } from "../models/book.js";
+
+// 誤った例
+import { IBook, Book } from "../models/book.js";
+```
+
+### スキーマのインポート
+- 型定義は`type`キーワードを使用
+- スキーマは直接インポート
+
+```typescript
+// 正しい例
+import type { CreateBookType } from "@shared/schemas/book.js";
+import { createBookSchema } from "@shared/schemas/book.js";
+
+// 誤った例
+import { CreateBookType, createBookSchema } from "@shared/schemas/book.js";
+```
+
+## 5. バリデーション
+
+### スキーマレベル
+- 必須フィールドの指定
+- データ型の指定
+- 文字列の長さ制限
+- 数値の範囲制限
+
+### アプリケーションレベル
+- ビジネスロジックに基づくバリデーション
+- カスタムバリデーターの使用
+- エラーメッセージの定義
+
+## 6. エラーハンドリング
+
+### データベースエラー
+- 接続エラー
+- クエリエラー
+- バリデーションエラー
+
+### エラーレスポンス
+- 適切なエラーコード
+- ユーザーフレンドリーなメッセージ
+- デバッグ情報（開発環境のみ）
+
+### エラーハンドリング実装
+- データベース操作のエラーは`utils/error.ts`の`throwInternalError`を使用
+- エラーメッセージは具体的で分かりやすい内容にする
+- エラーログは必ず出力する（`throwInternalError`が自動的に行う）
+- エラーメッセージは日本語で記述する
+

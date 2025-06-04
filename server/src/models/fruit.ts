@@ -1,5 +1,5 @@
 // server/src/models/fruit.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const fruitSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -7,11 +7,4 @@ const fruitSchema = new mongoose.Schema({
   price: { type: Number, required: true },
 });
 
-export const Fruit = mongoose.model('Fruit', fruitSchema);
-
-export type FruitType = {
-  _id: string;
-  name: string;
-  color: string;
-  price: number;
-};
+export const Fruit = mongoose.model("Fruit", fruitSchema);
