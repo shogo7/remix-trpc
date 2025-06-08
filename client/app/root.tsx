@@ -8,7 +8,6 @@ import {
   Scripts,
   ScrollRestoration,
   useRouteError,
-  useLocation,
 } from "@remix-run/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink } from "@trpc/client";

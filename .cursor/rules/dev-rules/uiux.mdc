@@ -104,7 +104,7 @@ const CustomButton = styled(Button)`
 
 ### 重要度: 高
 
-- トースト通知には`@/components/ui/toast`を使用
+- トースト通知には`sonner`を使用
 - エラーメッセージは具体的で分かりやすく
 - ローディング状態の適切な表示
 

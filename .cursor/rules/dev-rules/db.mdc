@@ -11,6 +11,54 @@ alwaysApply: true
 - ODM は **Mongoose** を使用
 - モデル定義は `server/src/models` に配置
 
+## 型の流れと変換
+
+### 型の変換フロー
+```
+Zod スキーマ (createMusicSchema など)
+    │
+    │ zodToMongooseSchema
+    ▼
+Mongoose スキーマ (new Schema({...}))
+    │
+    │ InferSchemaType
+    ▼
+TypeScript 型 (IMusicDocument など)
+```
+
+### 変換の目的
+1. **Zod → Mongoose**
+   - 静的＋実行時チェック（Zod）をランタイムのスキーマ（Mongoose）に変換
+   - バリデーションルールの共有と一貫性の確保
+
+2. **Mongoose → TypeScript**
+   - ランタイムのスキーマ（Mongoose）をTypeScriptの型情報に変換
+   - 型安全性の確保と開発時の補完機能の活用
+
+### 実装例
+```typescript
+// 1. Zodスキーマ定義（shared/schemas/music.ts）
+export const createMusicSchema = z.object({
+  title: z.string().min(1),
+  artist: z.string().min(1),
+  // ...
+});
+
+// 2. Mongooseスキーマ生成（server/src/models/music.ts）
+const zodSchema = zodToMongooseSchema(createMusicSchema);
+const musicMongooseSchema = new Schema({
+  ...zodSchema.obj,
+  userId: { type: Schema.Types.ObjectId, ref: "User" }
+});
+
+// 3. TypeScript型の生成
+export type IMusicDocument = InferSchemaType<typeof musicMongooseSchema>;
+```
+
+### メリット
+- 型定義の重複を避けられる（DRY原則）
+- スキーマと型の一貫性が保証される
+- バリデーションルールの一元管理が可能
 
 ## モデルの命名規則
 
@@ -222,4 +270,89 @@ import { CreateBookType, createBookSchema } from "@shared/schemas/book.js";
 - エラーメッセージは具体的で分かりやすい内容にする
 - エラーログは必ず出力する（`throwInternalError`が自動的に行う）
 - エラーメッセージは日本語で記述する
+
+## 7. Zod → Mongoose スキーマ変換
+
+### 基本ルール
+- すべてのモデルはZodスキーマをベースに作成する
+- `zodToMongooseSchema`関数を使用してMongooseスキーマを生成する
+- タイムスタンプ（createdAt, updatedAt）は自動的に追加される
+
+### 型変換マッピング
+| Zod型 | Mongoose型 | 追加機能 |
+|-------|------------|----------|
+| z.string() | String | trim: true, minlength, maxlength, email, url |
+| z.number() | Number | min, max, integer |
+| z.boolean() | Boolean | - |
+| z.date() | Date | - |
+| z.array() | Array | 要素の型変換 |
+| z.object() | Object | ネストされたスキーマ変換 |
+
+### バリデーションルール
+- 文字列制約
+  - min → minlength
+  - max → maxlength
+  - email → /.+@.+\..+/
+  - url → /^https?:\/\//
+
+- 数値制約
+  - min → min
+  - max → max
+  - int → Number.isInteger
+
+### オプショナル/Nullable
+- optional() → required: false
+- nullable() → required: false
+
+### 使用例
+```typescript
+// shared/schemas/music.ts
+import { z } from "zod";
+
+export const MusicSchema = z.object({
+  title: z.string().min(1),
+  artist: z.string().min(1),
+  genre: z.string().optional(),
+  year: z.number().min(1900).max(new Date().getFullYear()),
+  isActive: z.boolean(),
+  createdAt: z.date()
+});
+
+// server/src/models/music.ts
+import { zodToMongooseSchema } from "~/utils/zod-to-mongoose.js";
+import { MusicSchema } from "@shared/schemas/music.js";
+
+const musicMongooseSchema = zodToMongooseSchema(MusicSchema);
+
+// インデックス追加
+musicMongooseSchema.index({ title: 1 });
+musicMongooseSchema.index({ artist: 1 });
+musicMongooseSchema.index({ genre: 1 });
+musicMongooseSchema.index({ createdAt: -1 });
+
+export const Music = mongoose.model("Music", musicMongooseSchema);
+```
+
+## 6. データベースアクセス制御
+
+### 所有者チェック
+- ドキュメントの所有者チェックには`findByIdAndUserOrThrow`関数を使用
+- この関数は以下の2つのチェックを一括で行う：
+  1. ドキュメントの存在確認
+  2. ユーザーがドキュメントの所有者かどうかの確認
+
+```typescript
+// 使用例
+await findByIdAndUserOrThrow(
+  Music,                    // モデル
+  _id,                      // 検索するドキュメントのID
+  new Types.ObjectId(user._id), // ユーザーID
+  "音楽"                    // エラーメッセージ用のラベル
+);
+```
+
+### 実装ルール
+- 所有者チェックが必要な操作（更新・削除など）では必ず使用する
+- エラーメッセージのラベルは日本語で具体的に指定する
+- 型安全性を確保するため、`userId`フィールドを持つドキュメントのみを受け付ける
 

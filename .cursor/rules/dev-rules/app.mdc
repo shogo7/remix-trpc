@@ -329,7 +329,40 @@ export default function BooksPage() {
 }
 ```
 
-## 5. エラーハンドリング
+## 5. コントローラー層のデータ整形ルール
+
+### 重要度: 最高
+
+1. レスポンスデータの整形
+   - すべてのコントローラー関数は、フロントエンドに返す前に必ず`parse()`を通すこと
+   - 例：
+     ```typescript
+     // ✅ 良い例
+     const musics = await Music.find().lean();
+     return musics.map((music) => musicResponseSchema.parse(music));
+
+     // ❌ 悪い例
+     const musics = await Music.find().lean();
+     return musics; // parse()を通していない
+     ```
+
+2. データ整形の目的
+   - 型安全性の確保
+   - データ形式の一貫性維持
+   - 不要なフィールドの除去
+   - ObjectIdの文字列化
+
+3. 実装ルール
+   - 各リソースの`ResponseSchema`を必ず定義
+   - コントローラー関数の戻り値の型は`ResponseType`を使用
+   - エラーハンドリング時も`parse()`を通すこと
+
+4. 注意事項
+   - `parse()`を通さないデータをフロントエンドに返さない
+   - データベースから取得した生データをそのまま返さない
+   - 型の不一致や不要なフィールドの混入を防ぐ
+
+## 6. エラーハンドリング
 
 - クライアントサイド:
   - エラーバウンダリの実装
@@ -340,7 +373,7 @@ export default function BooksPage() {
   - ログ記録の実装
   - エラーの分類（バリデーション、認証、システム）
 
-## 6. 型安全性
+## 7. 型安全性
 
 ### クライアント側
 
@@ -553,7 +586,7 @@ export async function deleteBook(id: string, user: User) {
 }
 ```
 
-## 7. セキュリティ
+## 8. セキュリティ
 
 - 認証・認可:
   - JWT トークンの適切な管理
@@ -566,7 +599,7 @@ export async function deleteBook(id: string, user: User) {
   - CSRF 対策
   - SQL インジェクション対策
 
-## 8. デプロイメント
+## 9. デプロイメント
 
 - 環境設定:
   - 開発/本番環境の分離
@@ -576,7 +609,7 @@ export async function deleteBook(id: string, user: User) {
   - ビルドプロセスの最適化
   - デプロイメントパイプラインの構築
 
-## 9. メンテナンス
+## 10. メンテナンス
 
 - コード品質:
   - ESLint ルールの遵守

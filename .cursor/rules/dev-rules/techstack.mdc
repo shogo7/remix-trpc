@@ -12,6 +12,15 @@ alwaysApply: true
 
 # 技術スタック
 
+## パッケージマネージャー
+
+- **pnpm** - プロジェクト全体で使用するパッケージマネージャー
+  - npmやyarnではなく、常にpnpmを使用してください
+  - 依存関係のインストールは `pnpm add [パッケージ名]`
+  - 開発依存関係は `pnpm add -D [パッケージ名]`
+  - グローバルインストールは `pnpm add -g [パッケージ名]`
+  - スクリプト実行は `pnpm [スクリプト名]`
+
 ## フロントエンド
 
 ### コアテクノロジー
@@ -21,9 +30,8 @@ alwaysApply: true
 - **TypeScript** (v5.1.6) - 型付き JavaScript
 
 ### UI コンポーネント
-
 - **Tailwind CSS** (v3.4.1) - ユーティリティファースト CSS フレームワーク
-- **headlessui/react** - アクセシブルなヘッドレス UI コンポーネント
+- **headlessui/react** (v2.2.4) - アクセシブルなヘッドレス UI コンポーネント
   - Accordion, Alert Dialog,  Tabs など多数のコンポーネントを使用
 - **Lucide React** (v0.446.0) - アイコンライブラリ
 

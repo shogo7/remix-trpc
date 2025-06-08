@@ -1,3 +1,4 @@
+// shared/schemas/user.ts
 export type UserType = {
   _id: string;
   username: string;
