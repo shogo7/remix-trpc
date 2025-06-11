@@ -19,17 +19,42 @@ alwaysApply: false
 - Tailwind CSSのみを使用
 - **既存の UI は承認なしでの変更を禁止**
 - コンポーネントのカスタマイズは最小限に抑える
-- tailwind.config.jsで定義された色やテーマを使用
+- **必ずtailwind.config.tsで定義された色変数を使用すること**
 
 ```typescript
-// ✅ 良い例：Tailwind CSSのユーティリティクラスを使用
-<button className="bg-primary text-white px-4 py-2 rounded-lg">
+// ✅ 良い例：定義された色変数を使用
+<button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg">
+
+// ❌ 悪い例：直接カラーコードを指定
+<button className="bg-blue-500 text-white px-4 py-2 rounded-lg">
 
 // ❌ 悪い例：カスタムスタイルの使用
 <button style={{ backgroundColor: '#000', color: '#fff' }}>
 ```
 
-## 2. スタイリング規約
+## 2. カラーシステム
+
+### 重要度: 最高
+
+- **必ずtailwind.config.tsで定義された色変数を使用すること**
+- **ライトモードとダークモードの両方の色を指定すること**
+- **透過度が必要な場合は`/数値`の形式を使用すること**
+
+```typescript
+// ✅ 良い例：ライトモードとダークモードの両方を指定
+<div className="bg-background text-background-foreground dark:bg-dark-background dark:text-dark-background-foreground">
+
+// ✅ 良い例：透過度の指定
+<div className="bg-primary/50 dark:bg-dark-primary/50">
+
+// ❌ 悪い例：ダークモードが指定されていない
+<div className="bg-primary text-primary-foreground">
+
+// ❌ 悪い例：定義されていない色を使用
+<div className="bg-blue-500 text-white">
+```
+
+## 3. スタイリング規約
 
 ### 重要度: 高
 
@@ -38,17 +63,17 @@ alwaysApply: false
 - ユーティリティクラスを優先的に使用
 - カスタムクラスは`@layer`で定義
 - 命名規則は`kebab-case`を使用
-- tailwind.config.jsで定義された色やテーマを使用
+- tailwind.config.tsで定義された色やテーマを使用
 
 ```typescript
 // ✅ 良い例
-<div className="flex items-center justify-between p-4 bg-background text-foreground">
+<div className="flex items-center justify-between p-4 bg-background text-background-foreground dark:bg-dark-background dark:text-dark-background-foreground">
 
 // ❌ 悪い例
 <div style={{ display: 'flex', alignItems: 'center' }}>
 ```
 
-## 3. レスポンシブデザイン
+## 4. レスポンシブデザイン
 
 ### 重要度: 高
 
@@ -60,7 +85,7 @@ alwaysApply: false
   - xl: 1280px
   - 2xl: 1536px
 
-## 4. アクセシビリティ
+## 5. アクセシビリティ
 
 ### 重要度: 高
 
@@ -69,14 +94,14 @@ alwaysApply: false
 - 適切なコントラスト比の確保
 - スクリーンリーダー対応
 
-## 5. アニメーションとトランジション
+## 6. アニメーションとトランジション
 
 ### 重要度: 中
 
 - `tailwindcss/animation`の使用
 - 過度なアニメーションを避ける
 
-## 6. フォーム設計
+## 7. フォーム設計
 
 ### 重要度: 高
 
@@ -84,7 +109,7 @@ alwaysApply: false
 - バリデーションメッセージは明確に表示
 - 入力補助の実装（オートコンプリートなど）
 
-## 7. 重要な制約事項
+## 8. 重要な制約事項
 
 ### 重要度: 最高
 
@@ -99,7 +124,7 @@ alwaysApply: false
 - 新規コンポーネントはTailwind CSSの設計原則に従う
 - 既存のコンポーネントの再利用を優先
 
-## 8. エラー表示とフィードバック
+## 9. エラー表示とフィードバック
 
 ### 重要度: 高
 
@@ -107,22 +132,40 @@ alwaysApply: false
 - エラーメッセージは具体的で分かりやすく
 - ローディング状態の適切な表示
 
-## 9. アイコンとイメージ
+## 10. アイコンとイメージ
 
 ### 重要度: 中
 
 - Lucide Icons を標準として使用
 - SVG アイコンの最適化
 
-## 10. ダークモード対応
+## 11. ダークモード対応
 
-### 重要度: 高
+### 重要度: 最高
 
-- `dark:`プレフィックスでスタイリング
+- **必ず`dark:`プレフィックスでダークモードのスタイルを指定すること**
+- **ライトモードとダークモードの両方のスタイルを必ず指定すること**
 - システム設定との連動
 - コントラスト比の維持
 
-## 11. コンポーネント設計原則
+```typescript
+// ✅ 良い例：両方のモードを指定
+<div className="bg-background text-background-foreground dark:bg-dark-background dark:text-dark-background-foreground">
+
+// ✅ 良い例：コンポーネント全体にダークモード対応
+<Card className="dark:bg-dark-background">
+  <CardTitle className="dark:text-dark-background-foreground">タイトル</CardTitle>
+  <CardContent>...</CardContent>
+</Card>
+
+// ❌ 悪い例：ダークモードが指定されていない
+<div className="bg-background text-background-foreground">
+
+// ❌ 悪い例：直接カラーコードを指定
+<div className="bg-white dark:bg-gray-800">
+```
+
+## 12. コンポーネント設計原則
 
 ### 重要度: 高
 
