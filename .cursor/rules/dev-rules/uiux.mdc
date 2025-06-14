@@ -1,7 +1,7 @@
 ---
 description: 
-globs: *.tsx
-alwaysApply: false
+globs: 
+alwaysApply: true
 ---
 ---
 description: 
@@ -143,7 +143,6 @@ alwaysApply: false
 
 ### 重要度: 最高
 
-- **必ず`dark:`プレフィックスでダークモードのスタイルを指定すること**
 - **ライトモードとダークモードの両方のスタイルを必ず指定すること**
 - システム設定との連動
 - コントラスト比の維持
@@ -201,6 +200,7 @@ interface CardProps {
 - 不要なアニメーションの削除
 - 画像の最適化
 - バンドルサイズの監視
+- body に bg-background text-background-foreground を適用しているので、基本的に背景色と文字色を毎回指定する必要はありません。
 
 3. 品質管理
 

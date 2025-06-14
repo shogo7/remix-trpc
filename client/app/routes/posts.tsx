@@ -45,10 +45,12 @@ export default function PostsPage() {
             id="title"
             type="text"
             {...register("title")}
-            className="border p-2 w-full"
+            className="w-full px-4 py-2 border rounded-md bg-input text-muted-foreground border-border"
           />
           {errors.title && (
-            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            <p className="text-destructive text-sm mt-1">
+              {errors.title.message}
+            </p>
           )}
         </div>
         <div className="mb-4">
@@ -58,18 +60,18 @@ export default function PostsPage() {
           <textarea
             id="content"
             {...register("content")}
-            className="border p-2 w-full"
+            className="w-full px-4 py-2 border rounded-md bg-input text-muted-foreground border-border"
             rows={4}
           />
           {errors.content && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-destructive text-sm mt-1">
               {errors.content.message}
             </p>
           )}
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-primary px-4 py-2 rounded"
           disabled={createPost.isPending}
         >
           {createPost.isPending ? "投稿中..." : "投稿する"}
@@ -81,7 +83,7 @@ export default function PostsPage() {
           <div key={post.id} className="border p-4 rounded">
             <h2 className="text-xl font-bold">{post.title}</h2>
             <p className="mt-2">{post.content}</p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="text-sm text-muted-foreground mt-2">
               {new Date(post.createdAt).toLocaleString()}
             </p>
           </div>

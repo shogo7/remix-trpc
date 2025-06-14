@@ -7,6 +7,7 @@ import {
 } from "@shared/schemas/music.js";
 import { useRevalidator } from "@remix-run/react";
 import { toast } from "sonner";
+import { Button } from "~/components/ui/button.js";
 
 export function CreateMusicForm() {
   const revalidator = useRevalidator();
@@ -56,7 +57,7 @@ export function CreateMusicForm() {
       <div>
         <label
           htmlFor="title"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           タイトル
         </label>
@@ -64,17 +65,19 @@ export function CreateMusicForm() {
           {...register("title")}
           type="text"
           id="title"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border bg-input shadow-sm focus:border-primary focus:ring-primary"
         />
         {errors.title && (
-          <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+          <p className="mt-1 text-sm text-destructive">
+            {errors.title.message}
+          </p>
         )}
       </div>
 
       <div>
         <label
           htmlFor="artist"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           アーティスト
         </label>
@@ -82,17 +85,19 @@ export function CreateMusicForm() {
           {...register("artist")}
           type="text"
           id="artist"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border bg-input shadow-sm focus:border-primary focus:ring-primary"
         />
         {errors.artist && (
-          <p className="mt-1 text-sm text-red-600">{errors.artist.message}</p>
+          <p className="mt-1 text-sm text-destructive">
+            {errors.artist.message}
+          </p>
         )}
       </div>
 
       <div>
         <label
           htmlFor="genre"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           ジャンル
         </label>
@@ -100,17 +105,19 @@ export function CreateMusicForm() {
           {...register("genre")}
           type="text"
           id="genre"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border bg-input shadow-sm focus:border-primary focus:ring-primary"
         />
         {errors.genre && (
-          <p className="mt-1 text-sm text-red-600">{errors.genre.message}</p>
+          <p className="mt-1 text-sm text-destructive">
+            {errors.genre.message}
+          </p>
         )}
       </div>
 
       <div>
         <label
           htmlFor="releaseYear"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           リリース年
         </label>
@@ -118,10 +125,10 @@ export function CreateMusicForm() {
           {...register("releaseYear", { valueAsNumber: true })}
           type="number"
           id="releaseYear"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border bg-input shadow-sm focus:border-primary focus:ring-primary"
         />
         {errors.releaseYear && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-1 text-sm text-destructive">
             {errors.releaseYear.message}
           </p>
         )}
@@ -130,7 +137,7 @@ export function CreateMusicForm() {
       <div>
         <label
           htmlFor="description"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           説明
         </label>
@@ -138,10 +145,10 @@ export function CreateMusicForm() {
           {...register("description")}
           id="description"
           rows={3}
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border bg-input shadow-sm focus:border-primary focus:ring-primary"
         />
         {errors.description && (
-          <p className="mt-1 text-sm text-red-600">
+          <p className="mt-1 text-sm text-destructive">
             {errors.description.message}
           </p>
         )}
@@ -150,7 +157,7 @@ export function CreateMusicForm() {
       <div>
         <label
           htmlFor="url"
-          className="block text-sm font-medium text-gray-700"
+          className="block text-sm font-medium text-foreground"
         >
           URL
         </label>
@@ -158,10 +165,10 @@ export function CreateMusicForm() {
           {...register("url")}
           type="url"
           id="url"
-          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+          className="mt-1 block w-full rounded-md border bg-input shadow-sm focus:border-primary focus:ring-primary"
         />
         {errors.url && (
-          <p className="mt-1 text-sm text-red-600">{errors.url.message}</p>
+          <p className="mt-1 text-sm text-destructive">{errors.url.message}</p>
         )}
       </div>
 
@@ -170,20 +177,23 @@ export function CreateMusicForm() {
           {...register("isPublic")}
           type="checkbox"
           id="isPublic"
-          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+          className="h-4 w-4 rounded border-input text-primary focus:ring-primary"
         />
-        <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-900">
+        <label
+          htmlFor="isPublic"
+          className="ml-2 block text-sm text-foreground"
+        >
           公開する
         </label>
       </div>
 
-      <button
+      <Button
         type="submit"
         disabled={createMusic.isPending}
-        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+        className="w-full border border-transparent focus:ring-2 focus:ring-offset-2 focus:ring-primary"
       >
         {createMusic.isPending ? "登録中..." : "登録"}
-      </button>
+      </Button>
     </form>
   );
 }

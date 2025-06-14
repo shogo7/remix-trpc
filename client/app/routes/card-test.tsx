@@ -3,9 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "~/components/ui/card";
 export default function CardTest() {
   return (
     <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-8 text-background-foreground dark:text-dark-background-foreground">
-        カードコンポーネントテスト
-      </h1>
+      <h1 className="text-3xl font-bold mb-8">カードコンポーネントテスト</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* 基本的なカード */}
@@ -105,14 +103,9 @@ export default function CardTest() {
         </Card>
 
         {/* カスタムスタイル付きカード */}
-        <Card
-          variant="default"
-          className="border-2 border-primary dark:border-dark-primary"
-        >
+        <Card variant="default" className="border-2 border-primary">
           <CardHeader>
-            <CardTitle className="text-primary dark:text-dark-primary">
-              カスタムスタイル
-            </CardTitle>
+            <CardTitle className="text-primary">カスタムスタイル</CardTitle>
           </CardHeader>
           <CardContent>
             <p>Variant指定にさらにclassNameでカスタマイズができます。</p>
@@ -132,31 +125,25 @@ export default function CardTest() {
         {/* 透過度を使ったカード */}
         <Card
           variant="primary"
-          className="bg-opacity-20 dark:bg-opacity-20 border border-primary/50 dark:border-dark-primary/50"
+          className="bg-opacity-20 border border-primary/50"
         >
           <CardHeader>
-            <CardTitle className="text-primary dark:text-dark-primary">
-              透過カード
-            </CardTitle>
+            <CardTitle className="text-primary">透過カード</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-background-foreground dark:text-dark-background-foreground">
-              透過度を活用したカードデザインの例です。
-            </p>
+            <p>透過度を活用したカードデザインの例です。</p>
           </CardContent>
         </Card>
       </div>
 
       {/* カードの実用例 */}
-      <h2 className="text-2xl font-bold mt-12 mb-6 text-background-foreground dark:text-dark-background-foreground">
-        実用例
-      </h2>
+      <h2 className="text-2xl font-bold mt-12 mb-6">実用例</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* 製品カード */}
         <Card variant="default" className="overflow-hidden">
-          <div className="h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-            <span className="text-gray-500 dark:text-gray-400">製品画像</span>
+          <div className="h-48 bg-muted flex items-center justify-center">
+            <span className="text-muted-foreground">製品画像</span>
           </div>
           <CardHeader>
             <CardTitle>高性能ノートPC</CardTitle>
@@ -166,10 +153,8 @@ export default function CardTest() {
               最新のプロセッサと高速メモリを搭載した高性能ノートPCです。
             </p>
             <div className="flex justify-between items-center">
-              <span className="text-lg font-bold text-primary dark:text-dark-primary">
-                ¥128,000
-              </span>
-              <button className="bg-primary text-primary-foreground dark:bg-dark-primary dark:text-dark-primary-foreground px-4 py-2 rounded-lg">
+              <span className="text-lg font-bold text-primary">¥128,000</span>
+              <button className="bg-primary text-primary-foreground px-4 py-2 rounded-lg">
                 購入する
               </button>
             </div>
@@ -179,22 +164,22 @@ export default function CardTest() {
         {/* プロフィールカード */}
         <Card variant="default">
           <div className="flex justify-center pt-6">
-            <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-              <span className="text-gray-500 dark:text-gray-400">写真</span>
+            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center">
+              <span className="text-muted-foreground">写真</span>
             </div>
           </div>
           <CardHeader>
             <CardTitle className="text-center">山田 太郎</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center text-muted-foreground dark:text-dark-muted-foreground">
+            <p className="text-center text-muted-foreground">
               シニアソフトウェアエンジニア
             </p>
             <div className="flex justify-center gap-4 mt-4">
-              <button className="bg-primary text-primary-foreground dark:bg-dark-primary dark:text-dark-primary-foreground px-3 py-1 rounded">
+              <button className="bg-primary text-primary-foreground px-3 py-1 rounded">
                 フォロー
               </button>
-              <button className="bg-secondary text-secondary-foreground dark:bg-dark-secondary dark:text-dark-secondary-foreground px-3 py-1 rounded">
+              <button className="bg-secondary text-secondary-foreground px-3 py-1 rounded">
                 メッセージ
               </button>
             </div>
@@ -202,24 +187,19 @@ export default function CardTest() {
         </Card>
 
         {/* お知らせカード */}
-        <Card
-          variant="default"
-          className="border-l-4 border-l-info dark:border-l-dark-info"
-        >
+        <Card variant="default" className="border-l-4 border-l-info">
           <CardHeader className="pb-2">
-            <CardTitle className="text-info dark:text-dark-info">
-              お知らせ
-            </CardTitle>
+            <CardTitle className="text-info">お知らせ</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="mb-2">システムメンテナンスのお知らせ</p>
-            <p className="text-sm text-muted-foreground dark:text-dark-muted-foreground mb-3">
+            <p className="text-sm text-muted-foreground mb-3">
               2023年12月10日 23:00〜2023年12月11日
               3:00の間、システムメンテナンスを実施します。
             </p>
             <a
               href="#"
-              className="text-info dark:text-dark-info text-sm font-medium hover:underline"
+              className="text-info text-sm font-medium hover:underline"
             >
               詳細を見る →
             </a>
@@ -228,9 +208,7 @@ export default function CardTest() {
       </div>
 
       {/* インタラクティブカード */}
-      <h2 className="text-2xl font-bold mt-12 mb-6 text-background-foreground dark:text-dark-background-foreground">
-        インタラクティブカード
-      </h2>
+      <h2 className="text-2xl font-bold mt-12 mb-6">インタラクティブカード</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {/* ホバー効果付きカード */}

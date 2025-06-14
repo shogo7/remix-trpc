@@ -73,10 +73,12 @@ export default function BooksPage() {
             id="title"
             type="text"
             {...register("title")}
-            className="border p-2 w-full"
+            className="border bg-input p-2 w-full focus-visible:ring-ring"
           />
           {errors.title && (
-            <p className="text-red-500 text-sm mt-1">{errors.title.message}</p>
+            <p className="text-destructive text-sm mt-1">
+              {errors.title.message}
+            </p>
           )}
         </div>
         <div className="mb-4">
@@ -86,18 +88,18 @@ export default function BooksPage() {
           <textarea
             id="content"
             {...register("content")}
-            className="border p-2 w-full"
+            className="border bg-input p-2 w-full focus-visible:ring-ring"
             rows={4}
           />
           {errors.content && (
-            <p className="text-red-500 text-sm mt-1">
+            <p className="text-destructive text-sm mt-1">
               {errors.content.message}
             </p>
           )}
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded shadow hover:bg-primary/90"
           disabled={createBook.isPending}
         >
           {createBook.isPending ? "投稿中..." : "投稿する"}
@@ -106,10 +108,13 @@ export default function BooksPage() {
 
       <div className="space-y-4">
         {books?.map((book) => (
-          <div key={book.id} className="border p-4 rounded">
+          <div
+            key={book.id}
+            className="border border-border p-4 rounded-lg shadow-sm"
+          >
             <h2 className="text-xl font-bold">{book.title}</h2>
-            <p className="mt-2">{book.content}</p>
-            <p className="text-sm text-gray-500 mt-2">
+            <p className="mt-2 text-muted-foreground">{book.content}</p>
+            <p className="text-sm text-muted-foreground mt-2">
               {new Date(book.createdAt).toLocaleString()}
             </p>
           </div>

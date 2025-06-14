@@ -17,31 +17,23 @@ const Card = React.forwardRef<
   React.HTMLAttributes<HTMLDivElement> & { variant?: CardVariant }
 >(({ className, variant = "default", ...props }, ref) => {
   const variantClass = {
-    default:
-      "bg-background text-background-foreground dark:bg-dark-background dark:text-dark-background-foreground",
-    primary:
-      "bg-primary text-primary-foreground dark:bg-dark-primary dark:text-dark-primary-foreground",
-    secondary:
-      "bg-secondary text-secondary-foreground dark:bg-dark-secondary dark:text-dark-secondary-foreground",
-    success:
-      "bg-success text-success-foreground dark:bg-dark-success dark:text-dark-success-foreground",
-    warning:
-      "bg-warning text-warning-foreground dark:bg-dark-warning dark:text-dark-warning-foreground",
-    destructive:
-      "bg-destructive text-destructive-foreground dark:bg-dark-destructive dark:text-dark-destructive-foreground",
-    info: "bg-info text-info-foreground dark:bg-dark-info dark:text-dark-info-foreground",
-    muted:
-      "bg-muted text-muted-foreground dark:bg-dark-muted dark:text-dark-muted-foreground",
-    accent:
-      "bg-accent text-accent-foreground dark:bg-dark-accent dark:text-dark-accent-foreground",
+    default: "bg-background text-background-foreground",
+    primary: "bg-primary text-primary-foreground",
+    secondary: "bg-secondary text-secondary-foreground",
+    success: "bg-success text-success-foreground",
+    warning: "bg-warning text-warning-foreground",
+    destructive: "bg-destructive text-destructive-foreground",
+    info: "bg-info text-info-foreground",
+    muted: "bg-muted text-muted-foreground",
+    accent: "bg-accent text-accent-foreground",
   }[variant];
 
   return (
-    <div
-      ref={ref}
+  <div
+    ref={ref}
       className={cn("rounded-lg border shadow-sm", variantClass, className)}
-      {...props}
-    />
+    {...props}
+  />
   );
 });
 Card.displayName = "Card";

@@ -19,72 +19,38 @@ export default {
         ],
       },
       colors: {
-        primary: "#3b82f6", // 青（例: 編集）
-        "primary-foreground": "#ffffff",
+        primary: "hsl(var(--primary))",
+        "primary-foreground": "hsl(var(--primary-foreground))",
 
-        destructive: "#ef4444", // 赤（例: 削除）
-        "destructive-foreground": "#ffffff",
+        destructive: "hsl(var(--destructive))",
+        "destructive-foreground": "hsl(var(--destructive-foreground))",
 
-        secondary: "#64748b", // グレー系
-        "secondary-foreground": "#ffffff",
+        secondary: "hsl(var(--secondary))",
+        "secondary-foreground": "hsl(var(--secondary-foreground))",
 
-        muted: "#f3f4f6",
-        "muted-foreground": "#4b5563",
+        muted: "hsl(var(--muted))",
+        "muted-foreground": "hsl(var(--muted-foreground))",
 
-        input: "#e5e7eb",
-        ring: "#93c5fd",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
 
-        border: "#e2e8f0", // 汎用ボーダー色
+        border: "hsl(var(--border))",
 
-        background: "#ffffff", // 背景色（白）- ライトモード用
-        "background-foreground": "#111827", // 背景上のテキスト色（濃いグレー）
+        background: "hsl(var(--background))",
+        "background-foreground": "hsl(var(--background-foreground))",
 
-        accent: "#f3f4f6", // アクセント色（薄いグレー、hover時など）
-        "accent-foreground": "#1f2937", // アクセント上のテキスト色
+        accent: "hsl(var(--accent))",
+        "accent-foreground": "hsl(var(--accent-foreground))",
 
-        // ステータス関連の色
-        success: "#22c55e", // 緑色（成功）
-        "success-foreground": "#ffffff",
+        success: "hsl(var(--success))",
+        "success-foreground": "hsl(var(--success-foreground))",
 
-        warning: "#f59e0b", // オレンジ/黄色（警告）
-        "warning-foreground": "#ffffff",
+        warning: "hsl(var(--warning))",
+        "warning-foreground": "hsl(var(--warning-foreground))",
 
-        info: "#0ea5e9", // 青色（情報）
-        "info-foreground": "#ffffff",
+        info: "hsl(var(--info))",
+        "info-foreground": "hsl(var(--info-foreground))",
 
-        // ダークモード用の色を定義
-        "dark-primary": "#60a5fa", // 明るい青
-        "dark-primary-foreground": "#ffffff",
-
-        "dark-destructive": "#f87171", // 明るい赤
-        "dark-destructive-foreground": "#ffffff",
-
-        "dark-secondary": "#94a3b8", // 明るいグレー
-        "dark-secondary-foreground": "#ffffff",
-
-        "dark-muted": "#1f2937",
-        "dark-muted-foreground": "#9ca3af",
-
-        "dark-input": "#374151",
-        "dark-ring": "#60a5fa",
-
-        "dark-border": "#1f2937", // ダークモード用ボーダー色
-
-        "dark-background": "#030712", // 背景色（紺）
-        "dark-background-foreground": "#f3f4f6", // 背景上のテキスト色（明るいグレー）
-
-        "dark-accent": "#1f2937",
-        "dark-accent-foreground": "#f3f4f6",
-
-        // ダークモード用ステータス色
-        "dark-success": "#4ade80", // ダークモード用緑色（成功）
-        "dark-success-foreground": "#ffffff",
-
-        "dark-warning": "#fbbf24", // ダークモード用オレンジ/黄色（警告）
-        "dark-warning-foreground": "#1f2937",
-
-        "dark-info": "#38bdf8", // ダークモード用青色（情報）
-        "dark-info-foreground": "#ffffff",
       },
     },
   },

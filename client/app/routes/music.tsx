@@ -1,3 +1,4 @@
+// client/app/routes/music.tsx
 import { useLoaderData } from "@remix-run/react";
 import { createServerTRPCClient } from "~/lib/trpc.server";
 import { MusicList } from "~/components/music/MusicList.js";
@@ -16,12 +17,16 @@ export default function MusicPage() {
   return (
     <div className="container mx-auto py-8">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2">音楽管理</h1>
-        <p className="text-gray-600">お気に入りの音楽を登録・管理しましょう</p>
+        <h1 className="text-3xl font-bold mb-2 text-background-foreground">
+          音楽管理
+        </h1>
+        <p className="text-muted-foreground">
+          お気に入りの音楽を登録・管理しましょう
+        </p>
       </div>
 
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <h2 className="text-xl font-semibold mb-4 flex items-center text-background-foreground">
           <Music className="mr-2" />
           新しい音楽を登録
         </h2>
@@ -29,7 +34,7 @@ export default function MusicPage() {
       </div>
 
       <div>
-        <h2 className="text-xl font-semibold mb-4 flex items-center">
+        <h2 className="text-xl font-semibold mb-4 flex items-center text-background-foreground">
           <Music className="mr-2" />
           登録済みの音楽
         </h2>

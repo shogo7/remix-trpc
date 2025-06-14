@@ -72,7 +72,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
       <>
         <div
           className={cn(
-            "fixed inset-0 z-50 bg-black/80 transition-opacity duration-200",
+            "fixed inset-0 z-50 bg-background-foreground/80 transition-opacity duration-200",
             isAnimating ? "opacity-100" : "opacity-0"
           )}
           onClick={() => onOpenChange?.(false)}
@@ -80,7 +80,7 @@ const DialogContent = React.forwardRef<HTMLDivElement, DialogContentProps>(
         <div
           ref={ref}
           className={cn(
-            "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-white p-6 shadow-lg duration-200 sm:rounded-lg sm:max-w-[425px] text-gray-900",
+            "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 sm:rounded-lg sm:max-w-[425px] text-background-foreground",
             isAnimating
               ? "opacity-100 translate-y-[-50%]"
               : "opacity-0 translate-y-[-40%]",
@@ -138,7 +138,7 @@ const DialogTitle = React.forwardRef<
   <h2
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight text-gray-900",
+      "text-lg font-semibold leading-none tracking-tight text-background-foreground",
       className
     )}
     {...props}
@@ -150,7 +150,11 @@ const DialogDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn("text-sm text-gray-600", className)} {...props} />
+  <p
+    ref={ref}
+    className={cn("text-sm text-muted-foreground", className)}
+    {...props}
+  />
 ));
 DialogDescription.displayName = "DialogDescription";
 

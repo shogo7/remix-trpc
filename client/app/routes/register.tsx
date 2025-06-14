@@ -7,7 +7,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, RegisterInput } from "@shared/schemas/user.schema";
 import { toast } from "sonner";
 
-
 export default function Register() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -33,34 +32,43 @@ export default function Register() {
   };
 
   return (
-    <div className="p-4 max-w-md mx-auto">
-      <h1 className="text-2xl mb-4">ユーザー登録</h1>
+    <div className="max-w-md p-6 mx-auto bg-background rounded-lg shadow-sm">
+      <h1 className="text-2xl font-semibold mb-6 text-foreground">
+        ユーザー登録
+      </h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <input
-            className="border p-2 w-full"
+            className="w-full p-2 border border-input rounded-md bg-background text-foreground"
             type="text"
             placeholder="ユーザー名"
             {...register("username")}
           />
           {errors.username && (
-            <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>
+            <p className="text-sm mt-1 text-destructive">
+              {errors.username.message}
+            </p>
           )}
         </div>
 
         <div>
           <input
-            className="border p-2 w-full"
+            className="w-full p-2 border border-input rounded-md bg-background text-foreground"
             type="password"
             placeholder="パスワード"
             {...register("password")}
           />
           {errors.password && (
-            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+            <p className="text-sm mt-1 text-destructive">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
-        <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">
+        <button
+          className="w-full py-2 px-4 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors font-medium"
+          type="submit"
+        >
           登録
         </button>
       </form>
