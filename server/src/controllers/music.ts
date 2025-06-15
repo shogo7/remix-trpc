@@ -39,7 +39,10 @@ export const getAllMusic = async (): Promise<MusicResponseType[]> => {
 
     // 2) preprocess 経由で ObjectId→string になるので、
     //    そのまま parse() するだけでOK
-    return musics.map((music) => musicResponseSchema.parse(music));
+    return musics
+      .map((music) => musicResponseSchema.safeParse(music))
+      .filter((result) => result.success)
+      .map((result) => result.data);
   } catch (err) {
     return throwInternalError(err, "Failed to fetch all music");
   }
