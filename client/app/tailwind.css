@@ -2,11 +2,83 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  @apply bg-white dark:bg-gray-950;
+@layer base {
+  :root {
+    --radius: 0.5rem;
+
+    /* ライトモードの色定義 */
+    --primary: 217 91% 60%; /* #3b82f6 - 青 */
+    --primary-foreground: 0 0% 100%; /* #ffffff */
+
+    --destructive: 0 84% 60%; /* #ef4444 - 赤 */
+    --destructive-foreground: 0 0% 100%; /* #ffffff */
+
+    --secondary: 218 11% 65%; /* #64748b - グレー系 */
+    --secondary-foreground: 0 0% 100%; /* #ffffff */
+
+    --muted: 240 5% 96%; /* #f3f4f6 */
+    --muted-foreground: 217 19% 35%; /* #4b5563 */
+
+    --input: 220 13% 91%; /* #e5e7eb */
+    --ring: 213 94% 79%; /* #93c5fd */
+
+    --border: 214 32% 91%; /* #e2e8f0 */
+
+    --background: 0 0% 100%; /* #ffffff */
+    --background-foreground: 220 13% 10%; /* #111827 */
+
+    --accent: 240 5% 96%; /* #f3f4f6 */
+    --accent-foreground: 220 9% 17%; /* #1f2937 */
+
+    --success: 142 71% 45%; /* #22c55e - 緑 */
+    --success-foreground: 0 0% 100%; /* #ffffff */
+
+    --warning: 38 92% 50%; /* #f59e0b - オレンジ/黄色 */
+    --warning-foreground: 0 0% 100%; /* #ffffff */
+
+    --info: 199 89% 48%; /* #0ea5e9 - 青 */
+    --info-foreground: 0 0% 100%; /* #ffffff */
+  }
 
   @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+    :root {
+      /* ダークモードの色定義 */
+      --primary: 217 91% 70%; /* 青（明るめ） */
+      --primary-foreground: 0 0% 100%;
+
+      --destructive: 0 84% 70%; /* 赤（明るめ） */
+      --destructive-foreground: 0 0% 100%;
+
+      --secondary: 218 11% 75%; /* グレー（明るめ） */
+      --secondary-foreground: 0 0% 100%;
+
+      --muted: 240 5% 26%; /* 暗いグレー */
+      --muted-foreground: 217 19% 75%;
+
+      --input: 220 13% 25%;
+      --ring: 213 94% 65%;
+
+      --border: 214 32% 30%;
+
+      --background: 220 13% 10%; /* #111827 - 濃い青灰色 */
+      --background-foreground: 0 0% 100%; /* #ffffff */
+
+      --accent: 240 5% 26%;
+      --accent-foreground: 220 9% 87%;
+
+      --success: 142 70% 45%;
+      --success-foreground: 0 0% 100%;
+
+      --warning: 38 92% 60%;
+      --warning-foreground: 0 0% 100%;
+
+      --info: 199 89% 60%;
+      --info-foreground: 0 0% 100%;
+    }
   }
+}
+
+html,
+body {
+  @apply bg-background text-background-foreground;
 }

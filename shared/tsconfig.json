@@ -1,5 +1,10 @@
+// shared/tsconfig.json
 {
     "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+        "moduleResolution": "NodeNext",
+        "module": "NodeNext"
+    },
     "include": ["**/*.ts", "dateUtils.ts"]
-  }
+}
   

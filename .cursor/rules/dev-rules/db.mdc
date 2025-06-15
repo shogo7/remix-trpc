@@ -1,0 +1,358 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# データベース設計ルール（MongoDB + Mongoose）
+
+## 使用技術と管理方針
+
+- データベースは **MongoDB Atlas** を使用
+- ODM は **Mongoose** を使用
+- モデル定義は `server/src/models` に配置
+
+## 型の流れと変換
+
+### 型の変換フロー
+```
+Zod スキーマ (createMusicSchema など)
+    │
+    │ zodToMongooseSchema
+    ▼
+Mongoose スキーマ (new Schema({...}))
+    │
+    │ InferSchemaType
+    ▼
+TypeScript 型 (IMusicDocument など)
+```
+
+### 変換の目的
+1. **Zod → Mongoose**
+   - 静的＋実行時チェック（Zod）をランタイムのスキーマ（Mongoose）に変換
+   - バリデーションルールの共有と一貫性の確保
+
+2. **Mongoose → TypeScript**
+   - ランタイムのスキーマ（Mongoose）をTypeScriptの型情報に変換
+   - 型安全性の確保と開発時の補完機能の活用
+
+### 実装例
+```typescript
+// 1. Zodスキーマ定義（shared/schemas/music.ts）
+export const createMusicSchema = z.object({
+  title: z.string().min(1),
+  artist: z.string().min(1),
+  // ...
+});
+
+// 2. Mongooseスキーマ生成（server/src/models/music.ts）
+const zodSchema = zodToMongooseSchema(createMusicSchema);
+const musicMongooseSchema = new Schema({
+  ...zodSchema.obj,
+  userId: { type: Schema.Types.ObjectId, ref: "User" }
+});
+
+// 3. TypeScript型の生成
+export type IMusicDocument = InferSchemaType<typeof musicMongooseSchema>;
+```
+
+### メリット
+- 型定義の重複を避けられる（DRY原則）
+- スキーマと型の一貫性が保証される
+- バリデーションルールの一元管理が可能
+
+## モデルの命名規則
+
+- ファイル名は **小文字のスネークケース**（例: `user.ts`, `music_track.ts`）
+- モデル名（`mongoose.model()`）は **単数形のパスカルケース**（例: `User`, `MusicTrack`）
+
+
+## コレクションの命名規則
+
+- MongoDB上のコレクション名は **複数形のスネークケース**
+  - 例: `users`, `music_tracks`, `fruit_logs`
+- 英語の不規則な複数形を避けるため、`mongoose.model()` の第3引数で明示的に指定してもよい
+  ```ts
+  mongoose.model("Person", personSchema, "people");
+
+
+## フィールドの命名規則
+
+- フィールド名は **キャメルケース**（例: `createdAt`, `userId`）
+- 主キーは MongoDB のデフォルト `_id`（`ObjectId`）を使用
+- 外部参照（リレーション）は **`userId: string`** または **`user: ObjectId`** のいずれかを用途に応じて使い分け
+
+
+## ドキュメント構造の設計指針
+
+- **Embed（埋め込み）**：データが **常に一緒に使われる場合**（例: コメントリスト付きの投稿）
+- **Reference（参照）**：データが **個別に取得・更新される場合**（例: ユーザー情報、タグなど）
+
+## バリデーション
+- Mongooseの`required`, `minLength`, `match`などを活用
+- ユーザー入力にはZodなどを併用して二重バリデーション
+
+## インデックス
+- `userId`, `email`, `createdAt` などに必要に応じてインデックスを追加
+- Compound Index はアクセスパターンを元に決定
+
+## マイグレーション
+- モデルバージョン (`schemaVersion`フィールド) を使う or
+- 独自マイグレーションスクリプトを記述して `db/patches/` に保存
+
+## その他
+- ObjectId か UUID をどちらに統一するか方針を決める
+- コレクション命名は複数形のスネークケース（例:`music_tracks`）
+
+## インポートルール
+- すべてのimport文では`.js`拡張子を明示的に指定する
+  ```typescript
+  // ✅ 良い例
+  import { Music } from "@shared/schemas/music.js";
+  
+  // ❌ 悪い例
+  import { Music } from "@shared/schemas/music";
+  ```
+
+
+## 1. モデル定義の分離
+
+### スキーマと型の定義
+- 場所: `shared/schemas/[resource].ts`
+- 内容:
+  - Zodスキーマ定義
+  - 型定義（`z.infer`を使用）
+  - バリデーションルール
+- 命名規則:
+  - ファイル名: 小文字のスネークケース（例: `book.ts`）
+  - スキーマ名: キャメルケース + `Schema`（例: `createBookSchema`）
+  - 型名: パスカルケース + `Type`（例: `BookType`）
+
+```typescript
+// shared/schemas/book.ts
+import { z } from "zod";
+
+export const createBookSchema = z.object({
+  title: z.string().min(1).max(100),
+  author: z.string().min(1).max(100),
+  publishedYear: z.number().min(1800).max(new Date().getFullYear()),
+});
+
+export type CreateBookType = z.infer<typeof createBookSchema>;
+```
+
+
+
+### MongoDBモデル定義
+- 場所: `server/src/models/[resource].ts`
+
+
+## 型とモデルの命名規則
+- ファイル名: snakecase（例: `music.ts`）
+- モデル名: PascalCase（例: `Music`）
+- 型名: PascalCase + Type（例: `MusicType`）
+- インターフェース: I + PascalCase + Document（例: `IMusicDocument`）
+
+
+```typescript
+// server/src/models/book.ts
+import mongoose, { Schema, Document } from "mongoose";
+import type { CreateBookType } from "@shared/schemas/book.js";
+
+export interface IBook extends Document, CreateBookType {
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+const bookSchema = new Schema<IBook>(
+  {
+    title: { type: String, required: true, maxlength: 100 },
+    author: { type: String, required: true, maxlength: 100 },
+    publishedYear: { type: Number, min: 1800, max: new Date().getFullYear() },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+bookSchema.index({ title: 1 });
+bookSchema.index({ author: 1 });
+bookSchema.index({ publishedYear: -1 });
+
+export const Book = mongoose.model<IBook>("Book", bookSchema);
+```
+
+## 2. モデル命名規則
+
+### モデル名
+- 単数形のパスカルケース
+- 例: `Book`, `User`, `Music`
+
+### フィールド名
+- キャメルケース
+- 例: `publishedYear`, `createdAt`, `updatedAt`
+
+### インデックス名
+- 自動生成されるインデックス名を使用
+- 複合インデックスの場合は`field1_1_field2_-1`の形式
+
+## 3. インデックス設計
+
+### 必須インデックス
+- `_id`: 自動的に作成
+- `createdAt`: 降順（-1）
+- `updatedAt`: 降順（-1）
+
+### 推奨インデックス
+- 検索条件として頻繁に使用されるフィールド
+- ソート条件として使用されるフィールド
+- ユニーク制約が必要なフィールド
+
+### インデックス作成ルール
+- 複合インデックスは使用頻度の高い順にフィールドを配置
+- 部分インデックスは必要な場合のみ使用
+- スパースインデックスはnull値を除外する場合に使用
+
+## 4. インポートルール
+
+### モデルのインポート
+- 型定義は`type`キーワードを使用
+- モデルは直接インポート
+
+```typescript
+// 正しい例
+import type { IBook } from "../models/book.js";
+import { Book } from "../models/book.js";
+
+// 誤った例
+import { IBook, Book } from "../models/book.js";
+```
+
+### スキーマのインポート
+- 型定義は`type`キーワードを使用
+- スキーマは直接インポート
+
+```typescript
+// 正しい例
+import type { CreateBookType } from "@shared/schemas/book.js";
+import { createBookSchema } from "@shared/schemas/book.js";
+
+// 誤った例
+import { CreateBookType, createBookSchema } from "@shared/schemas/book.js";
+```
+
+## 5. バリデーション
+
+### スキーマレベル
+- 必須フィールドの指定
+- データ型の指定
+- 文字列の長さ制限
+- 数値の範囲制限
+
+### アプリケーションレベル
+- ビジネスロジックに基づくバリデーション
+- カスタムバリデーターの使用
+- エラーメッセージの定義
+
+## 6. エラーハンドリング
+
+### データベースエラー
+- 接続エラー
+- クエリエラー
+- バリデーションエラー
+
+### エラーレスポンス
+- 適切なエラーコード
+- ユーザーフレンドリーなメッセージ
+- デバッグ情報（開発環境のみ）
+
+### エラーハンドリング実装
+- データベース操作のエラーは`utils/error.ts`の`throwInternalError`を使用
+- エラーメッセージは具体的で分かりやすい内容にする
+- エラーログは必ず出力する（`throwInternalError`が自動的に行う）
+- エラーメッセージは日本語で記述する
+
+## 7. Zod → Mongoose スキーマ変換
+
+### 基本ルール
+- すべてのモデルはZodスキーマをベースに作成する
+- `zodToMongooseSchema`関数を使用してMongooseスキーマを生成する
+- タイムスタンプ（createdAt, updatedAt）は自動的に追加される
+
+### 型変換マッピング
+| Zod型 | Mongoose型 | 追加機能 |
+|-------|------------|----------|
+| z.string() | String | trim: true, minlength, maxlength, email, url |
+| z.number() | Number | min, max, integer |
+| z.boolean() | Boolean | - |
+| z.date() | Date | - |
+| z.array() | Array | 要素の型変換 |
+| z.object() | Object | ネストされたスキーマ変換 |
+
+### バリデーションルール
+- 文字列制約
+  - min → minlength
+  - max → maxlength
+  - email → /.+@.+\..+/
+  - url → /^https?:\/\//
+
+- 数値制約
+  - min → min
+  - max → max
+  - int → Number.isInteger
+
+### オプショナル/Nullable
+- optional() → required: false
+- nullable() → required: false
+
+### 使用例
+```typescript
+// shared/schemas/music.ts
+import { z } from "zod";
+
+export const MusicSchema = z.object({
+  title: z.string().min(1),
+  artist: z.string().min(1),
+  genre: z.string().optional(),
+  year: z.number().min(1900).max(new Date().getFullYear()),
+  isActive: z.boolean(),
+  createdAt: z.date()
+});
+
+// server/src/models/music.ts
+import { zodToMongooseSchema } from "~/utils/zod-to-mongoose.js";
+import { MusicSchema } from "@shared/schemas/music.js";
+
+const musicMongooseSchema = zodToMongooseSchema(MusicSchema);
+
+// インデックス追加
+musicMongooseSchema.index({ title: 1 });
+musicMongooseSchema.index({ artist: 1 });
+musicMongooseSchema.index({ genre: 1 });
+musicMongooseSchema.index({ createdAt: -1 });
+
+export const Music = mongoose.model("Music", musicMongooseSchema);
+```
+
+## 6. データベースアクセス制御
+
+### 所有者チェック
+- ドキュメントの所有者チェックには`findByIdAndUserOrThrow`関数を使用
+- この関数は以下の2つのチェックを一括で行う：
+  1. ドキュメントの存在確認
+  2. ユーザーがドキュメントの所有者かどうかの確認
+
+```typescript
+// 使用例
+await findByIdAndUserOrThrow(
+  Music,                    // モデル
+  _id,                      // 検索するドキュメントのID
+  new Types.ObjectId(user._id), // ユーザーID
+  "音楽"                    // エラーメッセージ用のラベル
+);
+```
+
+### 実装ルール
+- 所有者チェックが必要な操作（更新・削除など）では必ず使用する
+- エラーメッセージのラベルは日本語で具体的に指定する
+- 型安全性を確保するため、`userId`フィールドを持つドキュメントのみを受け付ける
+

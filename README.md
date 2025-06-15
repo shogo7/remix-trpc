@@ -64,13 +64,10 @@ src/models/ : データモデル（例：User, Fruit）
 
 src/middleware/auth.ts : Express ミドルウェア（認証処理）
 
-db.json : モックデータベース（ローカルJSON）
 ```
 
 ## 📝 今後のTODO
-・ 認証の実装強化（JWT）
 
-・ データベースの導入（MongoDB）
-
-
-
+・toast導入
+・Mongoose のスキーマに変換ロジックを入れる
+・パスワードの暗号化保存（Bcrypt）

@@ -1,5 +1,7 @@
-現在のTRPCを使ったフルスタックのプロジェクトですが、詳しく解説してもらえませんか？
+現在の TRPC を使ったフルスタックのプロジェクトですが、詳しく解説してもらえませんか？
+
 # 📁 プロジェクト構成 (tree)
+
 ```
 ./client/app
 ├── components
@@ -41,11 +43,15 @@
 
 9 directories, 26 files
 ```
--e 
+
+-e
+
 # 📄 ファイルの中身
--e 
----
+
+## -e
+
 ### ./package.json
+
 ```ts
 {
   "name": "remix-trpc",
@@ -72,22 +78,21 @@
     "eslint-plugin-react-hooks": "^4.6.0"
   }
 }
--e 
+-e
 ```
--e 
----
-### ./pnpm-workspace.yaml
-```ts
-packages:
-  - './client'
-  - './server'
-  - './shared'
 
--e 
+## -e
+
+### ./pnpm-workspace.yaml
+
+```ts
+packages: -"./client" - "./server" - "./shared" - e;
 ```
--e 
----
+
+## -e
+
 ### ./tsconfig.base.json
+
 ```ts
 // tsconfig.base.json
 {
@@ -110,25 +115,29 @@ packages:
         "@server/*": ["server/src/*"],
         "@shared/*": ["shared/*"]
       },
-  
+
     "noEmit": true
   }
 }
--e 
+-e
 ```
--e 
----
+
+## -e
+
 ### ./shared/tsconfig.json
+
 ```ts
 {
     "extends": "../tsconfig.base.json",
     "include": ["**/*.ts", "dateUtils.ts"]
   }
-  -e 
+  -e
 ```
--e 
----
+
+## -e
+
 ### ./shared/package.json
+
 ```ts
 {
   "name": "shared",
@@ -137,13 +146,16 @@ packages:
   "private": true,
   "main": "index.ts",
   "dependencies": {
-    "dayjs": "^1.11.13"
+    "dayjs": "^1.11.13",
+    "zod": "^3.24.2"
   }
-}-e 
+}-e
 ```
--e 
----
+
+## -e
+
 ### ./client/package.json
+
 ```ts
 {
   "name": "client",
@@ -158,6 +170,7 @@ packages:
     "typecheck": "tsc"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.0.1",
     "@remix-run/node": "^2.16.5",
     "@remix-run/react": "^2.16.5",
     "@remix-run/serve": "^2.16.5",
@@ -170,6 +183,8 @@ packages:
     "js-cookie": "^3.0.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.56.1",
+    "sonner": "^2.0.3",
     "superjson": "^2.2.2",
     "zod": "^3.24.2"
   },
@@ -196,11 +211,13 @@ packages:
     "node": ">=20.0.0"
   }
 }
--e 
+-e
 ```
--e 
----
+
+## -e
+
 ### ./client/tsconfig.json
+
 ```ts
 // client/tsconfig.json
 {
@@ -210,22 +227,22 @@ packages:
     "moduleResolution": "Bundler", // Vite に最適な形式,
   },
 }
--e 
+-e
 ```
--e 
----
-### ./client/app/routes/_index.tsx
+
+## -e
+
+### ./client/app/routes/\_index.tsx
+
 ```ts
 // client/app/routes/_index.tsx
 
 import { Link } from "@remix-run/react";
 import { trpc } from "../lib/trpc";
-import { formatDate } from "@shared/dateUtils";
 
 export default function Index() {
   const { data: fruits, isLoading, error } = trpc.fruit.getFruits.useQuery();
-  const today = formatDate(new Date());
-  
+
   return (
     <div className="container mx-auto p-4">
       <div className="flex justify-end space-x-4 mb-4">
@@ -236,7 +253,6 @@ export default function Index() {
           Login
         </Link>
       </div>
-      <div>Today is {today}</div>
       <h1 className="mb-4 text-2xl font-bold">Fruit List</h1>
 
       {isLoading && <p>Loading...</p>}
@@ -268,11 +284,13 @@ export default function Index() {
     </div>
   );
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./client/app/routes/fruits.$id.tsx
+
 ```ts
 // client/app/routes/fruits.$id.tsx
 import { useLoaderData, Link } from "@remix-run/react";
@@ -308,22 +326,26 @@ export default function FruitDetail() {
     </div>
   );
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./client/app/lib/trpc.ts
+
 ```ts
 // client/app/lib/trpc.ts
-import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '@server/trpc'; 
+import { createTRPCReact } from "@trpc/react-query";
+import type { AppRouter } from "@server/trpc";
 
 export const trpc = createTRPCReact<AppRouter>();
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./client/app/lib/trpc.server.ts
+
 ```ts
 // client/lib/trpc.server.ts.ts
 
@@ -357,11 +379,13 @@ export function createServerTRPCClient(request: Request) {
 
   return client;
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./client/app/root.tsx
+
 ```ts
 // client/app/root.tsx
 
@@ -379,7 +403,8 @@ import superjson from "superjson";
 import { trpc } from "./lib/trpc";
 import "./tailwind.css";
 import Header from "./components/Header";
-import Cookies from "js-cookie"; // これを追加！
+import Cookies from "js-cookie";
+import { Toaster } from "sonner";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -427,14 +452,14 @@ export default function App() {
             credentials: "include",
             headers: {
               ...options?.headers,
-              "x-csrf-token": csrfToken || "", 
+              "x-csrf-token": csrfToken || "",
             },
           });
         },
       }),
     ],
   });
-  
+
   return (
     <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>
@@ -442,15 +467,18 @@ export default function App() {
         <main className="p-4">
           <Outlet />
         </main>
+        <Toaster richColors position="top-center" />
       </QueryClientProvider>
     </trpc.Provider>
   );
 }
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/package.json
+
 ```ts
 {
   "name": "server",
@@ -493,11 +521,13 @@ export default function App() {
 
   }
 }
--e 
+-e
 ```
--e 
----
+
+## -e
+
 ### ./server/tsconfig.json
+
 ```ts
 // server/tsconfig.json
 {
@@ -510,57 +540,65 @@ export default function App() {
   },
   "include": ["src", "types"]
 }
--e 
+-e
 ```
--e 
----
+
+## -e
+
 ### ./server/src/index.ts
+
 ```ts
 // server/src/index.ts
-import express from 'express';
-import cors from 'cors';
-import { appRouter } from './trpc/index.js';
-import { createExpressMiddleware } from '@trpc/server/adapters/express';
-import { authMiddleware } from './middleware/auth.js';
-import { csrfMiddleware } from './middleware/csrf.js';
-import cookieParser from 'cookie-parser';
-import { createContext } from './trpc/context.js';
-import dotenv from 'dotenv';
+import express from "express";
+import cors from "cors";
+import { appRouter } from "./trpc/index.js";
+import { createExpressMiddleware } from "@trpc/server/adapters/express";
+import { attachUserFromJwt } from "./middleware/auth.js";
+import { csrfMiddleware } from "./middleware/csrf.js";
+import cookieParser from "cookie-parser";
+import { createContext } from "./trpc/context.js";
+import dotenv from "dotenv";
 dotenv.config();
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-
-mongoose.connect(process.env.MONGODB_URI!)
-  .then(() => console.log('🍃 Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose
+  .connect(process.env.MONGODB_URI!)
+  .then(() => console.log("🍃 Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 const app = express();
 const PORT = process.env.PORT ?? 3010;
 
 app.use(cookieParser());
-app.use(authMiddleware);
+app.use(attachUserFromJwt);
 app.use(csrfMiddleware);
 
+app.use(
+  cors({
+    origin: true,
+    methods: ["GET", "POST"],
+    credentials: true,
+  })
+);
 
-app.use(cors({
-  origin: true,
-  methods: ['GET', 'POST'],
-  credentials: true
-}));
-
-app.use('/trpc', createExpressMiddleware({
-  router: appRouter,
-  createContext,
-}));
+app.use(
+  "/trpc",
+  createExpressMiddleware({
+    router: appRouter,
+    createContext,
+  })
+);
 
 app.listen(PORT, () => {
   console.log(`🚀 tRPC API running at http://localhost:${PORT}/trpc`);
 });
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/trpc/index.ts
+
 ```ts
 // server/src/trpc/index.ts
 import { t } from "./trpc.js";
@@ -573,22 +611,23 @@ export const appRouter = t.router({
 });
 
 export type AppRouter = typeof appRouter;
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/trpc/context.ts
+
 ```ts
 // server/src/trpc/context.ts
-import type { CreateExpressContextOptions } from '@trpc/server/adapters/express';
+import type { CreateExpressContextOptions } from "@trpc/server/adapters/express";
 
 export function createContext({ req, res }: CreateExpressContextOptions) {
-  const csrfHeader = req.headers['x-csrf-token'];
-  const csrfCookie = req.cookies['csrf-token'];
+  const csrfHeader = req.headers["x-csrf-token"];
+  const csrfCookie = req.cookies["csrf-token"];
 
-
-  if (req.method !== 'GET' && csrfHeader !== csrfCookie) {
-    throw new Error('CSRF token mismatch');
+  if (req.method !== "GET" && csrfHeader !== csrfCookie) {
+    throw new Error("CSRF token mismatch");
   }
 
   return {
@@ -599,14 +638,16 @@ export function createContext({ req, res }: CreateExpressContextOptions) {
 }
 
 export type Context = ReturnType<typeof createContext>;
--e 
+-e;
 ```
--e 
----
+
+## -e
+
 ### ./server/src/models/fruit.ts
+
 ```ts
 // server/src/models/fruit.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const fruitSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -614,7 +655,7 @@ const fruitSchema = new mongoose.Schema({
   price: { type: Number, required: true },
 });
 
-export const Fruit = mongoose.model('Fruit', fruitSchema);
+export const Fruit = mongoose.model("Fruit", fruitSchema);
 
 export type FruitType = {
   _id: string;
@@ -622,5 +663,25 @@ export type FruitType = {
   color: string;
   price: number;
 };
--e 
+-e;
+```
+
+## -e
+
+### ./server/types/global.d.ts
+
+```ts
+// server/types/global.d.ts
+import type { User } from "../src/models/user.js";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: Pick<User, "id" | "username">;
+      csrfToken?: string;
+    }
+  }
+}
+export {}; // ← モジュール化（これがないと global に作用しない）
+-e;
 ```

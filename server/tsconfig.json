@@ -6,6 +6,13 @@
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
     "typeRoots": ["./node_modules/@types", "./types"],
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "~/*": ["./src/*"],
+      "@server/*": ["./*"],
+      "@shared/*": ["../shared/*"]
+    }
   },
   "include": ["src", "types"]
 }

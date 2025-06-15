@@ -3,7 +3,7 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Bundler", // Client向け（serverでは上書き可）
+    // "moduleResolution": "Bundler", // Client向け（serverでは上書き可）
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "jsx": "react-jsx",
     "esModuleInterop": true,
@@ -15,8 +15,6 @@
     "isolatedModules": true,
     "baseUrl": ".",
     "paths": {
-        "@client/*": ["client/app/*"],
-        "@server/*": ["server/src/*"],
         "@shared/*": ["shared/*"]
       },
   
